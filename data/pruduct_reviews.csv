@@ -1,0 +1,101 @@
+ID,Type_of_Feature,Score_0_5,Name_of_the_user,Age,Sex,Location,City
+1,Sensor Accuracy,3.2,User1,20,M,USA,New York
+2,Wear Duration,4.5,User2,21,F,Canada,Toronto
+3,Mobile App & Alerts,2.8,User3,22,M,UK,London
+4,Data Continuity,5.0,User4,23,F,Germany,Berlin
+5,Adaptive AI Insights,4.0,User5,24,M,France,Paris
+6,Sensor Comfort,1.5,User6,25,F,Spain,Madrid
+7,Adhesive Reliability,3.7,User7,26,M,Japan,Tokyo
+8,Battery Life,2.2,User8,27,F,Australia,Sydney
+9,Calibration Process,4.9,User9,28,M,Brazil,Rio de Janeiro
+10,Trend Arrows,3.0,User10,29,F,South Africa,Cape Town
+11,Sensor Accuracy,3.2,User11,30,M,USA,New York
+12,Wear Duration,4.5,User12,31,F,Canada,Toronto
+13,Mobile App & Alerts,2.8,User13,32,M,UK,London
+14,Data Continuity,5.0,User14,33,F,Germany,Berlin
+15,Adaptive AI Insights,4.0,User15,34,M,France,Paris
+16,Sensor Comfort,1.5,User16,35,F,Spain,Madrid
+17,Adhesive Reliability,3.7,User17,36,M,Japan,Tokyo
+18,Battery Life,2.2,User18,37,F,Australia,Sydney
+19,Calibration Process,4.9,User19,38,M,Brazil,Rio de Janeiro
+20,Trend Arrows,3.0,User20,39,F,South Africa,Cape Town
+21,Sensor Accuracy,3.2,User21,40,M,USA,New York
+22,Wear Duration,4.5,User22,41,F,Canada,Toronto
+23,Mobile App & Alerts,2.8,User23,42,M,UK,London
+24,Data Continuity,5.0,User24,43,F,Germany,Berlin
+25,Adaptive AI Insights,4.0,User25,44,M,France,Paris
+26,Sensor Comfort,1.5,User26,45,F,Spain,Madrid
+27,Adhesive Reliability,3.7,User27,46,M,Japan,Tokyo
+28,Battery Life,2.2,User28,47,F,Australia,Sydney
+29,Calibration Process,4.9,User29,48,M,Brazil,Rio de Janeiro
+30,Trend Arrows,3.0,User30,49,F,South Africa,Cape Town
+31,Sensor Accuracy,3.2,User31,50,M,USA,New York
+32,Wear Duration,4.5,User32,20,F,Canada,Toronto
+33,Mobile App & Alerts,2.8,User33,21,M,UK,London
+34,Data Continuity,5.0,User34,22,F,Germany,Berlin
+35,Adaptive AI Insights,4.0,User35,23,M,France,Paris
+36,Sensor Comfort,1.5,User36,24,F,Spain,Madrid
+37,Adhesive Reliability,3.7,User37,25,M,Japan,Tokyo
+38,Battery Life,2.2,User38,26,F,Australia,Sydney
+39,Calibration Process,4.9,User39,27,M,Brazil,Rio de Janeiro
+40,Trend Arrows,3.0,User40,28,F,South Africa,Cape Town
+41,Sensor Accuracy,3.2,User41,29,M,USA,New York
+42,Wear Duration,4.5,User42,30,F,Canada,Toronto
+43,Mobile App & Alerts,2.8,User43,31,M,UK,London
+44,Data Continuity,5.0,User44,32,F,Germany,Berlin
+45,Adaptive AI Insights,4.0,User45,33,M,France,Paris
+46,Sensor Comfort,1.5,User46,34,F,Spain,Madrid
+47,Adhesive Reliability,3.7,User47,35,M,Japan,Tokyo
+48,Battery Life,2.2,User48,36,F,Australia,Sydney
+49,Calibration Process,4.9,User49,37,M,Brazil,Rio de Janeiro
+50,Trend Arrows,3.0,User50,38,F,South Africa,Cape Town
+51,Sensor Accuracy,3.2,User51,39,M,USA,New York
+52,Wear Duration,4.5,User52,40,F,Canada,Toronto
+53,Mobile App & Alerts,2.8,User53,41,M,UK,London
+54,Data Continuity,5.0,User54,42,F,Germany,Berlin
+55,Adaptive AI Insights,4.0,User55,43,M,France,Paris
+56,Sensor Comfort,1.5,User56,44,F,Spain,Madrid
+57,Adhesive Reliability,3.7,User57,45,M,Japan,Tokyo
+58,Battery Life,2.2,User58,46,F,Australia,Sydney
+59,Calibration Process,4.9,User59,47,M,Brazil,Rio de Janeiro
+60,Trend Arrows,3.0,User60,48,F,South Africa,Cape Town
+61,Sensor Accuracy,3.2,User61,49,M,USA,New York
+62,Wear Duration,4.5,User62,50,F,Canada,Toronto
+63,Mobile App & Alerts,2.8,User63,20,M,UK,London
+64,Data Continuity,5.0,User64,21,F,Germany,Berlin
+65,Adaptive AI Insights,4.0,User65,22,M,France,Paris
+66,Sensor Comfort,1.5,User66,23,F,Spain,Madrid
+67,Adhesive Reliability,3.7,User67,24,M,Japan,Tokyo
+68,Battery Life,2.2,User68,25,F,Australia,Sydney
+69,Calibration Process,4.9,User69,26,M,Brazil,Rio de Janeiro
+70,Trend Arrows,3.0,User70,27,F,South Africa,Cape Town
+71,Sensor Accuracy,3.2,User71,28,M,USA,New York
+72,Wear Duration,4.5,User72,29,F,Canada,Toronto
+73,Mobile App & Alerts,2.8,User73,30,M,UK,London
+74,Data Continuity,5.0,User74,31,F,Germany,Berlin
+75,Adaptive AI Insights,4.0,User75,32,M,France,Paris
+76,Sensor Comfort,1.5,User76,33,F,Spain,Madrid
+77,Adhesive Reliability,3.7,User77,34,M,Japan,Tokyo
+78,Battery Life,2.2,User78,35,F,Australia,Sydney
+79,Calibration Process,4.9,User79,36,M,Brazil,Rio de Janeiro
+80,Trend Arrows,3.0,User80,37,F,South Africa,Cape Town
+81,Sensor Accuracy,3.2,User81,38,M,USA,New York
+82,Wear Duration,4.5,User82,39,F,Canada,Toronto
+83,Mobile App & Alerts,2.8,User83,40,M,UK,London
+84,Data Continuity,5.0,User84,41,F,Germany,Berlin
+85,Adaptive AI Insights,4.0,User85,42,M,France,Paris
+86,Sensor Comfort,1.5,User86,43,F,Spain,Madrid
+87,Adhesive Reliability,3.7,User87,44,M,Japan,Tokyo
+88,Battery Life,2.2,User88,45,F,Australia,Sydney
+89,Calibration Process,4.9,User89,46,M,Brazil,Rio de Janeiro
+90,Trend Arrows,3.0,User90,47,F,South Africa,Cape Town
+91,Sensor Accuracy,3.2,User91,48,M,USA,New York
+92,Wear Duration,4.5,User92,49,F,Canada,Toronto
+93,Mobile App & Alerts,2.8,User93,50,M,UK,London
+94,Data Continuity,5.0,User94,20,F,Germany,Berlin
+95,Adaptive AI Insights,4.0,User95,21,M,France,Paris
+96,Sensor Comfort,1.5,User96,22,F,Spain,Madrid
+97,Adhesive Reliability,3.7,User97,23,M,Japan,Tokyo
+98,Battery Life,2.2,User98,24,F,Australia,Sydney
+99,Calibration Process,4.9,User99,25,M,Brazil,Rio de Janeiro
+100,Trend Arrows,3.0,User100,26,F,South Africa,Cape Town
