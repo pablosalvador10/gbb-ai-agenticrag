@@ -1,0 +1,104 @@
+# Setting Up SharePoint Integration (Tool) with Azure AI Agents
+
+## 📝 Overview
+
+SharePoint can be used as a secure data source to ground your Azure AI Agents with documents stored in SharePoint. For example, you can connect to a SharePoint site like `contoso.sharepoint.com/sites/policies`. When a user sends a query, Azure AI Agents will determine whether SharePoint should be leveraged. If so, the query is sent via the SharePoint tool, which:
+
+1. Verifies if the user has an M365 Copilot license.
+2. Uses the end user's identity to retrieve relevant documents they have access to.
+3. Generates responses based on the retrieved information.
+
+With SharePoint integration, **On-Behalf-Of (OBO)** authentication is supported, allowing the SharePoint tool to retrieve documents based on the end user's identity and access.
+
+---
+
+## ✅ Prerequisites
+
+Before you begin, ensure the following:
+
+1. **Existing SharePoint Site**: Developers must have access to the SharePoint site.
+2. **M365 Copilot Licenses**: Both developers and end users must have M365 Copilot licenses.
+3. **Supported Regions**: Your Azure OpenAI (AOAI) resource and AI project must be in one of the following regions:
+   - `westus`
+   - `japaneast`
+   - `francecentral`
+
+---
+
+## 🔑 Role-Based Access Control (RBAC) Requirements
+
+- **For Developers**: Must have the **AI Developer** role to create, read, update, or delete (CRUD) a SharePoint tool in Azure AI Agent.
+- **For End Users**: Must have the **AI Developer** role to enable On-Behalf-Of (OBO) authentication.
+
+---
+
+## 🛠️ How-To Guide
+
+### 1️⃣ Verify Access to the Existing SharePoint Site
+
+Ensure developers have the necessary permissions to access the SharePoint site:
+
+1. Navigate to the SharePoint site.
+2. Click on the gear icon (⚙️) in the top-right corner and select **"Site Permissions"**.
+3. Choose **"Advanced Permission Settings"**.
+4. Click on **"Check Permissions"** in the ribbon.
+5. Enter the developer's username or email and click **"Check Now"**.
+6. Review the permissions to ensure they have appropriate access.
+
+---
+
+### 2️⃣ Confirm M365 Copilot Licenses for Developers and End Users
+
+Both developers and end users must have M365 Copilot licenses. Follow these steps to verify:
+
+#### For Administrators:
+1. Sign in to [Microsoft Admin Center](https://admin.microsoft.com/) with an admin account.
+2. Navigate to **Billing > Licenses** to view available licenses.  
+   👉 [Learn more about licensing requirements](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing).
+3. Go to **Users > Active Users**.
+4. Select a user and click on **Licenses and Apps**.
+5. Ensure the **M365 Copilot** license is assigned.
+
+#### Option 1: Check via Microsoft Account Portal
+1. Go to [Microsoft Account Portal](https://myaccount.microsoft.com/).
+2. On the left sidebar, check:
+   - **My Apps** → Look for M365 Copilot.
+   - **My Access** → This may show assigned licenses.
+   - **My Groups** → If there is an M365 Copilot group, you might be assigned a license through it.
+3. If you see **My Subscriptions** or **Licenses**, click it to check if the **M365 Copilot** license is assigned to you.
+
+> **Tip**: If you can’t find your license, contact your IT department or Microsoft 365 administrator to verify.
+
+---
+
+### 3️⃣ Verify Azure OpenAI (AOAI) Resource and AI Project Regions
+
+Ensure your AOAI resources and AI projects are in one of the supported regions:
+- **West US**
+- **Japan East**
+- **France Central**
+
+---
+
+### 4️⃣ Assign Appropriate RBAC Roles
+
+Proper RBAC roles are essential for managing SharePoint tools in Azure AI Agent.
+
+#### For Developers:
+- Must have the **AI Developer** role to CRUD a SharePoint tool.
+
+#### For End Users:
+- Must have the **AI Developer** role to enable OBO authentication.
+
+#### Steps to Assign Roles:
+1. Go to [Azure Portal](https://portal.azure.com/).
+2. Navigate to **Subscriptions** and select your subscription.
+3. Click on **Access Control (IAM)** > **Add Role Assignment**.
+4. Choose the **AI Developer** role.
+5. Select the users or groups to assign the role to and click **Save**.
+
+---
+
+## 🎉 You're All Set!
+
+Once you've completed these steps, your SharePoint integration with Azure AI Agents is ready to go! 🚀
