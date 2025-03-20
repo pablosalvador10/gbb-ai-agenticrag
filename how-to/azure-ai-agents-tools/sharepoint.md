@@ -10,8 +10,6 @@ SharePoint can be used as a secure data source to ground your Azure AI Agents wi
 
 With SharePoint integration, **On-Behalf-Of (OBO)** authentication is supported, allowing the SharePoint tool to retrieve documents based on the end user's identity and access.
 
----
-
 ## ✅ Prerequisites
 
 Before you begin, ensure the following:
@@ -23,14 +21,10 @@ Before you begin, ensure the following:
    - `japaneast`
    - `francecentral`
 
----
-
 ## 🔑 Role-Based Access Control (RBAC) Requirements
 
 - **For Developers**: Must have the **AI Developer** role to create, read, update, or delete (CRUD) a SharePoint tool in Azure AI Agent.
 - **For End Users**: Must have the **AI Developer** role to enable On-Behalf-Of (OBO) authentication.
-
----
 
 ## 🛠️ How-To Guide
 
@@ -44,8 +38,6 @@ Ensure developers have the necessary permissions to access the SharePoint site:
 4. Click on **"Check Permissions"** in the ribbon.
 5. Enter the developer's username or email and click **"Check Now"**.
 6. Review the permissions to ensure they have appropriate access.
-
----
 
 ### 2️⃣ Confirm M365 Copilot Licenses for Developers and End Users
 
@@ -69,16 +61,12 @@ Both developers and end users must have M365 Copilot licenses. Follow these step
 
 > **Tip**: If you can’t find your license, contact your IT department or Microsoft 365 administrator to verify.
 
----
-
 ### 3️⃣ Verify Azure OpenAI (AOAI) Resource and AI Project Regions
 
 Ensure your AOAI resources and AI projects are in one of the supported regions:
 - **West US**
 - **Japan East**
 - **France Central**
-
----
 
 ### 4️⃣ Assign Appropriate RBAC Roles
 
@@ -96,8 +84,6 @@ Proper RBAC roles are essential for managing SharePoint tools in Azure AI Agent.
 3. Click on **Access Control (IAM)** > **Add Role Assignment**.
 4. Choose the **AI Developer** role.
 5. Select the users or groups to assign the role to and click **Save**.
-
----
 
 ## 🎉 You're All Set!
 
