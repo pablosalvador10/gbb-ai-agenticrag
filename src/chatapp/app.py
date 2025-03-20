@@ -9,48 +9,43 @@ from semantic_kernel.agents.azure_ai import AzureAIAgent
 from semantic_kernel.agents.strategies import TerminationStrategy, KernelFunctionSelectionStrategy
 from semantic_kernel.functions import KernelFunctionFromPrompt
 from utils.ml_logging import get_logger
+from typing import List, Dict, Any
 
+# Initialize logger
 logger = get_logger()
 
-project_client = AzureAIAgent.create_client(credential=DefaultAzureCredential())
+# Set the correct tenant ID explicitly
+TENANT_ID = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 
-# ------------------------------
-# 1. Define the Approval Termination Strategy
-# ------------------------------
+async def get_credential():
+    return DefaultAzureCredential()
+
 class ApprovalTerminationStrategy(TerminationStrategy):
     """
     Ends the conversation if the Evaluator agent's last output includes the word 'approved'.
     """
-    def __init__(self, agents, maximum_iterations=10):
+    def __init__(self, agents: List[AzureAIAgent], maximum_iterations: int = 10):
         super().__init__(maximum_iterations=maximum_iterations)
         self.agents = agents
 
-    async def should_agent_terminate(self, agent, history) -> bool:
+    async def should_agent_terminate(self, agent: AzureAIAgent, history: List[Dict[str, Any]]) -> bool:
         last_msg = history[-1]
-        # Use .get() for safe access to keys in the chat history dictionary
         agent_name = last_msg.get("name", "")
         content = last_msg.get("content", "")
         return (agent_name in [a.name for a in self.agents]) and ("approved" in content.lower())
 
-###############################################################################
-# 3) Creating a Kernel for the Selection Function
-###############################################################################
 def _create_kernel_with_chat_completion(service_id: str) -> Kernel:
     """
     Creates a Semantic Kernel instance with an Azure OpenAI chat completion service.
-    Make sure you have environment variables for your Azure OpenAI keys/endpoint.
     """
-    from semantic_kernel import Kernel
     from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 
     kernel = Kernel()
-    # Retrieve environment vars (adjust to your naming)
     AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
     AZURE_OPENAI_API_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
     AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
-    AZURE_AOAI_CHAT_MODEL_DEPLOYMENT = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_ID", "gpt-4o-standard")  
+    AZURE_AOAI_CHAT_MODEL_DEPLOYMENT = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_ID", "gpt-4o-standard")
 
-    # Register an Azure Chat Completion service in the kernel
     kernel.add_service(
         service=AzureChatCompletion(
             deployment_name=AZURE_AOAI_CHAT_MODEL_DEPLOYMENT,
@@ -61,9 +56,6 @@ def _create_kernel_with_chat_completion(service_id: str) -> Kernel:
     )
     return kernel
 
-# ------------------------------
-# 3. Define the Selection Function Prompt
-# ------------------------------
 RETRIEVER_NAME = "ValidationInsightsAgent"
 EVALUATOR_NAME = "DataRetrievalAgent"
 
@@ -88,101 +80,108 @@ History:
 """,
 )
 
-# ------------------------------
-# 4. Initialize Agents and Chat
-# ------------------------------
-async def initialize_agents():
-# Create credential and project_client using async context managers
+async def initialize_agents() -> AgentGroupChat:
+    """
+    Initializes the Azure AI agents and sets up the multi-agent chat.
+    """
+    creds = await get_credential()  # ✅ Corrected: Awaiting the async function
 
-    # Agent IDs (adjust these to match your setup)
-    ValidationInsightsAgentID = "asst_kdFT72VdYH0YpoG3tJ5lmoFy"
-    DataRetrievalAgentID = "asst_Wo0GJ9MpmvkfRPNwllC7bYFS"
+    async with AzureAIAgent.create_client(credential=creds) as project_client:
+        ValidationInsightsAgentID = "asst_cflIDuNZR0fOpTJp59zhhDdn"
+        DataRetrievalAgentID = "asst_BN7AvpIntZuA4s7nI2wQB4ri"
 
-    dataretrieval_def = await project_client.agents.get_agent(agent_id=DataRetrievalAgentID)
-    validation_def = await project_client.agents.get_agent(agent_id=ValidationInsightsAgentID)
+        dataretrieval_def = await project_client.agents.get_agent(agent_id=DataRetrievalAgentID)
+        validation_def = await project_client.agents.get_agent(agent_id=ValidationInsightsAgentID)
 
-    # Build agents
-    agent_retriever = AzureAIAgent(client=project_client, definition=dataretrieval_def)
-    agent_evaluator = AzureAIAgent(client=project_client, definition=validation_def)
+        agent_retriever = AzureAIAgent(client=project_client, definition=dataretrieval_def)
+        agent_evaluator = AzureAIAgent(client=project_client, definition=validation_def)
 
-    # Setup the multi-agent chat
-    chat = AgentGroupChat(
-        agents=[agent_retriever, agent_evaluator],
-        termination_strategy=ApprovalTerminationStrategy(
-            maximum_iterations=10,
-            agents=[agent_evaluator],  # Evaluator decides final approval
-        ),
-        selection_strategy=KernelFunctionSelectionStrategy(
-            function=selection_function,
-            kernel=_create_kernel_with_chat_completion("chat"),
-            # Custom result parser to ensure we return a valid agent name:
-            result_parser=lambda result: (
-                result.value.strip()
-                if result.value and result.value.strip() in [RETRIEVER_NAME, EVALUATOR_NAME]
-                else EVALUATOR_NAME
+        chat = AgentGroupChat(
+            agents=[agent_retriever, agent_evaluator],
+            termination_strategy=ApprovalTerminationStrategy(
+                maximum_iterations=10,
+                agents=[agent_evaluator],
             ),
-            agent_variable_name="agents",
-            history_variable_name="history",
-        ),
+            selection_strategy=KernelFunctionSelectionStrategy(
+                function=selection_function,
+                kernel=_create_kernel_with_chat_completion("chat"),
+                result_parser=lambda result: (
+                    result.value.strip()
+                    if result.value and result.value.strip() in [RETRIEVER_NAME, EVALUATOR_NAME]
+                    else EVALUATOR_NAME
+                ),
+                agent_variable_name="agents",
+                history_variable_name="history",
+            ),
+        )
+        logger.info("Agents initialized successfully.")
+        return chat
+
+async def main():
+    """
+    Main function to run the Streamlit app with an Azure Copilot-inspired chat interface.
+    """
+    st.set_page_config(page_title="Azure AI Chat Interface")
+    
+    st.markdown("""
+        <style>
+        .stApp {
+            background: linear-gradient(135deg, #001f3f 0%, #0078d4 100%);
+            color: #FFFFFF;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        /* Title styling */
+        .title {
+            text-align: center;
+            font-size: 36px;
+            margin-top: 20px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
-    logger.info("Agents initialized successfully.")
-    return chat
-
-# ------------------------------
-# 5. Build the Streamlit Interface
-# ------------------------------
-async def main():
-    st.set_page_config(page_title="Multi-Agent Chat Interface", layout="wide")
-    st.title("Multi-Agent Chat Interface")
-
-    # Initialize session state if not already set
+    # --- Page Title ---
+    st.markdown(
+        "<h2 style='text-align: center;'>R+D Chat 🤖</h2>", unsafe_allow_html=True
+    )
+   
+    # --- Main Chat Container ---
     if "chat" not in st.session_state:
+        # Initialize multi-agent chat once
         st.session_state.chat = await initialize_agents()
-        st.session_state.history = []
+        st.session_state.chat_history = []
 
-    # Display chat history in a ChatGPT-like interface
-    for message in st.session_state.history:
-        role = message.get("role", "system")
-        name = message.get("name", "System")
-        content = message.get("content", "")
-        with st.chat_message(role):
-            st.markdown(f"**{name}:** {content}")
+    respond_container = st.container(height=500)
+    with respond_container:
+        for message in st.session_state["chat_history"]:
+            role, content = message["role"], message["content"]
+            avatar = "🧑‍💻" if role == "user" else "🤖"
+            with st.chat_message(role, avatar=avatar):
+                st.markdown(content, unsafe_allow_html=True)
 
-    # Get user input
-    user_input = st.chat_input("Enter your message:")
-    if user_input:
-        # Append user message to chat history and display it
-        st.session_state.history.append({"role": "user", "name": "User", "content": user_input})
-        with st.chat_message("user"):
-            st.markdown(f"**User:** {user_input}")
+    prompt = st.chat_input("Type your message here...")
+    if prompt:
+        st.session_state["messages"].append({"role": "user", "content": prompt})
+        st.session_state["chat_history"].append({"role": "user", "content": prompt})
 
-        # Add the user message to the multi-agent chat for processing
-        await st.session_state.chat.add_chat_message(message=user_input)
+        with respond_container:
+            with st.chat_message("user", avatar="🧑‍💻"):
+                st.markdown(prompt, unsafe_allow_html=True)
 
-        try:
-            # Process agent responses
-            async for content in st.session_state.chat.invoke():
-                agent_name = content.name or "Unknown"
-                agent_role = content.role.name
-                agent_output = content.content
-
-                st.session_state.history.append({
-                    "role": agent_role,
-                    "name": agent_name,
-                    "content": agent_output
-                })
-                with st.chat_message(agent_role):
-                    st.markdown(f"**{agent_name}:** {agent_output}")
-        except Exception as ex:
-            st.error(f"Error during chat invocation: {ex}")
-            logger.error(f"Error during chat invocation: {ex}")
-
-        # If conversation is complete, notify and reset chat
-        if st.session_state.chat.is_complete:
-            st.info("Conversation has been approved and terminated.")
-            await st.session_state.chat.reset()
-            st.session_state.history = []
-
+            with st.chat_message("assistant", avatar="🤖"):
+                messages = st.session_state["messages"]
+                await st.session_state.chat.add_chat_message(message=prompt)
+                try:
+                    async for content in st.session_state.chat.invoke():
+                        agent_name = content.name or "Unknown"
+                        agent_role = content.role.name
+                        agent_output = content.content
+                        st.session_state["chat_history"].append({"role": agent_role, "content": agent_output})
+                except Exception as e:
+                    st.error(f"Error: {e.message}")
+                    logger.error(f"Error: {e.message}")
+               
+# --- Run the app ---
 if __name__ == "__main__":
     asyncio.run(main())
