@@ -76,7 +76,7 @@ remove_conda_env:
 
 # Target to run the Streamlit app locally
 run_streamlit:
-	streamlit run app/frontend/streamlit/Home.py
+	streamlit run src/chatapp/app.py
 
 streamlite_conf:
 	streamlit config show
