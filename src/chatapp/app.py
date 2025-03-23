@@ -22,7 +22,7 @@ EVALUATOR_NAME = "DataRetrievalAgent"
 
 # --- Termination Strategy ---
 class ApprovalTerminationStrategy(TerminationStrategy):
-    def __init__(self, agents, maximum_iterations=10):
+    def __init__(self, agents, maximum_iterations=3):
         super().__init__(maximum_iterations=maximum_iterations)
         self.agents = agents
 
@@ -69,6 +69,17 @@ selection_function = KernelFunctionFromPrompt(
     """,
     )
 
+def get_agent_style(agent_name):
+    if agent_name == RETRIEVER_NAME:
+        # Light blue for the Retriever agent
+        return "background-color: #E3F2FD; border-radius: 10px; padding: 10px; margin: 5px 0;"
+    elif agent_name == EVALUATOR_NAME:
+        # Light teal for the Evaluator agent
+        return "background-color: #E0F7FA; border-radius: 10px; padding: 10px; margin: 5px 0;"
+    else:
+        # Default light gray for other agents
+        return "background-color: #F5F5F5; border-radius: 10px; padding: 10px; margin: 5px 0;"
+
 # --- Async Main ---
 async def main():
     st.set_page_config(page_title="Azure AI Chat Interface")
@@ -77,12 +88,14 @@ async def main():
         DefaultAzureCredential() as creds,
         AzureAIAgent.create_client(credential=creds) as client,
     ):
+        ValidationInsightsAgentID = "asst_cflIDuNZR0fOpTJp59zhhDdn"
+        DataRetrievalAgentID = "asst_BN7AvpIntZuA4s7nI2wQB4ri"
 
-        retriever_def = await client.agents.get_agent("asst_cflIDuNZR0fOpTJp59zhhDdn")
-        evaluator_def = await client.agents.get_agent("asst_BN7AvpIntZuA4s7nI2wQB4ri")
+        dataretrieval_def = await client.agents.get_agent(agent_id=DataRetrievalAgentID)
+        validation_def = await client.agents.get_agent(agent_id=ValidationInsightsAgentID)
 
-        agent_retriever = AzureAIAgent(client=client, definition=retriever_def)
-        agent_evaluator = AzureAIAgent(client=client, definition=evaluator_def)
+        agent_retriever = AzureAIAgent(client=client, definition=dataretrieval_def)
+        agent_evaluator = AzureAIAgent(client=client, definition=validation_def)
 
         st.session_state.chat = AgentGroupChat(
             agents=[agent_retriever, agent_evaluator],
@@ -95,15 +108,25 @@ async def main():
                 history_variable_name="history",
             ),
         )
+        SYSTEM_MESSAGE = """
+        You are a helpful assistant. Your task is to assist the user in retrieving and evaluating data."""
+        
+        await st.session_state.chat.add_chat_message(SYSTEM_MESSAGE)
         st.session_state.chat_history = []
+        st.session_state.chat_history.append({"role": "system", "content": SYSTEM_MESSAGE})
 
-        chat_container = st.container(height=500)
+        chat_container = st.container(height=400)
 
         with chat_container:
             for msg in st.session_state.chat_history:
                 avatar = "🧑‍💻" if msg["role"] == "user" else msg.get("avatar", "🤖")
                 with st.chat_message(msg["role"], avatar=avatar):
                     st.markdown(msg["content"], unsafe_allow_html=True)
+
+        agent_name_to_id = {
+            RETRIEVER_NAME: DataRetrievalAgentID,
+            EVALUATOR_NAME: ValidationInsightsAgentID,
+        }
 
         prompt = st.chat_input("Type your message here...")
 
@@ -112,31 +135,70 @@ async def main():
             with chat_container:
                 with st.chat_message("user", avatar="🧑‍💻"):
                     st.markdown(prompt, unsafe_allow_html=True)
-
+        
                 await st.session_state.chat.add_chat_message(prompt)
-
-                try:
-                    async for response in st.session_state.chat.invoke():
-                        st.spinner("Thinking...")
-                        agent_name = response.name or "Agent"
-                        avatar = "📖" if agent_name == RETRIEVER_NAME else "🔎" if agent_name == EVALUATOR_NAME else "🤖"
-                        
-                        with st.expander(f"**{agent_name}** is thinking..."):
-                            with st.chat_message("assistant", avatar=avatar):
-                                st.markdown(f"**{agent_name}:** {response.content}")
-
+                with st.spinner(f"Thinking..."):
+                    try:
+                        async for response in st.session_state.chat.invoke():
+                            agent_name = response.name or "Agent"
+                            avatar = "📖" if agent_name == RETRIEVER_NAME else "🔎" if agent_name == EVALUATOR_NAME else "🤖"
+                            agent_style = get_agent_style(agent_name)  # Get the CSS style for the agent
+        
+                            # Extract citations from the response
+                            citations = []
+                            unique_urls = set()  # To track unique URLs and avoid duplicates
+                            if hasattr(response, "items"):  # Check if response has items
+                                for item in response.items:
+                                    if item.content_type == "annotation" and item.url:
+                                        if item.url not in unique_urls:
+                                            unique_urls.add(item.url)
+                                            citations.append({"quote": item.quote, "url": item.url})
+        
+                            agent_id = agent_name_to_id.get(agent_name, 'unknown')
+        
+                            # Combine the response content with citations
+                            combined_content = response.content
+                            if citations:
+                                combined_content += "\n\n**Citations:**\n"
+                                for citation in citations:
+                                    combined_content += f"- **Quote**: {citation['quote']}  \n  **URL**: [{citation['url']}]({citation['url']})\n"
+        
+                            # Add the response and citations to the chat history
+                            with st.expander(f"**{avatar} {agent_name}** ..."):
+                                with st.chat_message(f"Azure AI Agent {agent_id}", avatar=avatar):
+                                    # Display the agent's response content with a styled background
+                                    st.markdown(
+                                        f"<div style='{agent_style}'>"
+                                        f"<strong>Azure AI Agent (ID: {agent_id}) -> </strong>"  # Add a line of separation
+                                        f"{combined_content}"  # Display the combined content
+                                        f"</div>",
+                                        unsafe_allow_html=True,
+                                    )
+        
+                            # Append the response and citations to the session state
                             st.session_state.chat_history.append({
                                 "role": "assistant",
-                                "content": f"**{agent_name}:** {response.content}",
-                                "avatar": avatar
+                                "content": combined_content,
+                                "avatar": avatar,
+                                "citations": citations if citations else None
                             })
-
-                except Exception as e:
-                    detailed_traceback = traceback.format_exc()
-                    st.error(f"Error: {e}\n\nTraceback:\n```\n{detailed_traceback}\n```")
-                    logger.error(f"Chat error: {e}\nDetailed traceback:\n{detailed_traceback}")
-
-
+        
+                    except Exception as e:
+                        detailed_traceback = traceback.format_exc()
+                        st.error(f"Error: {e}\n\nTraceback:\n```\n{detailed_traceback}\n```")
+                        logger.error(f"Chat error: {e}\nDetailed traceback:\n{detailed_traceback}")
+        
+                    finally:
+                        # Safely extract the last assistant message from the chat history
+                        final_message = next(
+                            (msg for msg in reversed(st.session_state.chat_history) if msg["role"] == "assistant"), 
+                            None
+                        )
+                        if final_message:
+                            final_response = final_message["content"]
+                            # Prominently display the final Assistant response
+                            with st.chat_message("assistant", avatar="🤖"):
+                                st.markdown(final_response, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     asyncio.run(main())
