@@ -1,5 +1,5 @@
 PYTHON_INTERPRETER = python
-CONDA_ENV ?= pa-ai-env
+CONDA_ENV ?= azure-ai-agent-service-demo
 export PYTHONPATH=$(PWD):$PYTHONPATH;
 
 # Target for setting up pre-commit and pre-push hooks

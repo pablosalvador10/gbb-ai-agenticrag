@@ -10,7 +10,6 @@ import time
 import traceback
 from io import BytesIO
 from typing import Any, Dict, List, Literal, Optional, Union
-
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import openai
@@ -26,7 +25,6 @@ load_dotenv()
 
 # Set up logger
 logger = get_logger()
-
 
 class AzureOpenAIManager:
     """
