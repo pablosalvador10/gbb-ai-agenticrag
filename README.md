@@ -33,23 +33,38 @@ Enterprises today wrestle with siloed data and rigid, one‑shot retrieval pipel
 
 By adopting this component‑based, autonomous approach, you transform static RAG into a self‑optimizing intelligence layer—delivering governed, real‑time insights and actions at enterprise scale.  
 
+## **🤖 Building Agentic Systems in Azure**
+
+In today's fast-evolving Agentic AI landscape, staying ahead means embracing rapid experimentation. Our approach in ths repo is to keep it simple and to the point, starting with the development of robust, scalable **enterprise single agents** using the Azure AI Agent Service. These production-ready agents come equipped with integrated tools, persistent memory, traceability, and isolated execution—providing a solid foundation before scaling up.
+
+Then, of course, we'll tackle communication patterns between single agents. Just as clear conversation drives human collaboration, real-time event exchange between agents unlocks their full potential as a cohesive system. By leveraging frameworks like **Semantic Kernel**—or even crafting your own— you can establish an event-driven architecture that seamlessly ties everything together (single-agents) to build multi-agent systems.
+
+```text
+Multi-Agent Architecture = Σ (Production-Ready Single Agents [tools, memory, traceability, isolation]) + Preferred Framework (e.g., Semantic Kernel, AutoGen)
+```
+
+**Breaking It Down**
+
+- **Step 1:** Build robust, scalable single agents with the **Azure AI Agent Service**, managing them as micro-services.
+- **Step 2:** For complex tasks, deploy a fleet of specialized agents that communicate seamlessly via an event-driven framework of your choice.
+
 ## **👩🏾‍💻 How to Get Started**
 
-**First‑time users** – Open the notebooks listed under **AgenticRAG Labs**. They walk you through provisioning Azure AI Agent Service, registering Planner/Fabric/SharePoint agents, and running your first multi‑agent retrieval workflow. **Experienced engineers** – Jump straight to **Use Cases** for complete, production‑style patterns that show how AgenticRAG powers domain‑specific knowledge stores and decision support.
+**First‑time users** – Open the notebooks listed under **AgenticRAG Labs**. They walk you through provisioning Azure AI Agent Service and running your first multi‑agent retrieval workflow. **Experienced engineers** – Jump straight to **Use Cases**- where we showcase how to build AgenticRAG powers domain‑specific knowledge stores and decision support.
 
 ### **🧪 [AgenticRAG Labs](labs/README.md)**
 
-- **Intro to Azure AI Agent Service**: 🧾 [Notebook – Getting Started with Azure AI Agent Service](labs/01-intro-azure-ai-agent-service.ipynb)  
+- **Intro to Azure AI Agent Service**: 🧾 [Notebook – Building Single Agents with Azure AI Agent Service](labs/01-single-agent-with-azure-ai-agents.ipynb)  
   Provision your Azure AI Agent Service instance, configure OBO authentication, and register your first Planner agent.
 
-- **Deep Dive into Semantic Kernel**: 🧾 [Notebook – Orchestrating Agents with Semantic Kernel](labs/02-deep-dive-semantic-kernel.ipynb)  
-  Use the Semantic Kernel SDK to build multi‑step workflows, chain prompts, and implement reflection loops.
-
-- **Azure Fabric Data Agent**: 🧾 [Notebook – Connecting Microsoft Fabric to Your Agents](labs/03-azure-fabric-data-agent.ipynb)  
+- **Azure Fabric Data Agent**: 🧾 [Notebook – Connecting Microsoft Fabric to Your Agents](labs/02-azure-fabric-data-agent.ipynb)  
   Create and register a Fabric Data Agent to transform lakehouse and warehouse tables into conversational Q&A.
 
-- **Azure SharePoint Agent**: 🧾 [Notebook – On‑Behalf‑Of Access & SharePoint Retrieval](labs/04-azure-sharepoint-agent.ipynb)  
+- **Azure SharePoint Agent**: 🧾 [Notebook – On‑Behalf‑Of Access & SharePoint Retrieval](labs/03-azure-sharepoint-agent.ipynb)  
   Connect to SharePoint, and surface documents, blueprints, and notes in context.
+
+- **Building MaS with Azure AI Agents & Semantic Kernel Agent Framework**: 🧾 [Notebook – Orchestrating Agents with Semantic Kernel](labs/04-deep-dive-semantic-kernel-agentic-framework.ipynb)  
+  Use the Semantic Kernel SDK to build multi‑step workflows, chain prompts, and implement reflection loops.
 
 ### **🏭 Use Cases**
 
@@ -85,8 +100,9 @@ A Product Manager at a leading MedTech company uses Agentic RAG to analyze next�
 
 ## 📚 More Resources
 
-- **[Azure AI Agent Service](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)** – Official overview and getting‑started guide for Azure AI Agent Service.  
-- **[Semantic Kernel](https://github.com/microsoft/semantic-kernel)** – Open‑source SDK and docs for building and orchestrating AI agents.  
+- **[Azure AI Foundry](https://azure.microsoft.com/en-us/products/ai-foundry/?msockid=0b24a995eaca6e7d3c1dbc1beb7e6fa8#Use-cases-and-Capabilities)**: Develop and deploy custom AI apps and APIs responsibly with a comprehensive platform.
+- **[Azure AI Agent Service](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)**: Learn about Azure AI Agent Service and its capabilities.
+- **[Semantic Kernel Documentation](https://learn.microsoft.com/en-us/semantic-kernel/overview/)**: Detailed documentation on Semantic Kernel's features and capabilities.
 - **[Fabric Data Agent](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/fabric?tabs=csharp&pivots=overview)** – How‑to guide on connecting Microsoft Fabric to your Agentic RAG pipeline.  
 - **[SharePoint Data Agent](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/sharepoint?tabs=csharp&pivots=overview)** – Steps to configure OBO and surface SharePoint content via agents.  
 - **[Grounding with Bing Search](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/bing-grounding?tabs=python&pivots=overview)** – Documentation for integrating live web search into your workflows.  
