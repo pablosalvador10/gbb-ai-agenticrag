@@ -57,13 +57,17 @@ Multi-Agent Architecture = Σ (Production-Ready Single Agents [tools, memory, tr
 - **Intro to Azure AI Agent Service**: 🧾 [Notebook – Building Single Agents with Azure AI Agent Service](labs/01-single-agent-with-azure-ai-agents.ipynb)  
   Provision your Azure AI Agent Service instance, configure OBO authentication, and register your first Planner agent.
 
-- **Azure Fabric Data Agent**: 🧾 [Notebook – Connecting Microsoft Fabric to Your Agents](labs/02-azure-fabric-data-agent.ipynb)  
+- **Azure Fabric Retriever Agent**: 🧾 [Notebook – Connecting Microsoft Fabric to Your Agents](labs/02-azure-fabric-data-agent.ipynb)  
   Create and register a Fabric Data Agent to transform lakehouse and warehouse tables into conversational Q&A.
 
-- **Azure SharePoint Agent**: 🧾 [Notebook – On‑Behalf‑Of Access & SharePoint Retrieval](labs/03-azure-sharepoint-agent.ipynb)  
+- **Azure SharePoint Retriever Agent**: 🧾 [Notebook – Connecting SharePoint Sites to Your Agents](labs/03-azure-sharepoint-retriever-agent.ipynb
+)  
   Connect to SharePoint, and surface documents, blueprints, and notes in context.
 
-- **Building MaS with Azure AI Agents & Semantic Kernel Agent Framework**: 🧾 [Notebook – Orchestrating Agents with Semantic Kernel](labs/04-deep-dive-semantic-kernel-agentic-framework.ipynb)  
+- **Azure Bing Retriever Agent**: 🧾 [Notebook – Connecting Real-Time Data to Your Agents](labs/04-azure-bing-retriever-agent.ipynb)  
+  Connect to the Web, and surface latest news, research to add real-time context.
+
+- **Building MaS with Azure AI Agents & Semantic Kernel Agent Framework**: 🧾 [Notebook – Orchestrating Agents with Semantic Kernel](labs/05-semantic-kernel-agent-framework.ipynb)  
   Use the Semantic Kernel SDK to build multi‑step workflows, chain prompts, and implement reflection loops.
 
 ### **🏭 Use Cases**
