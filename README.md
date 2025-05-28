@@ -6,11 +6,12 @@
 
 > This project is **part of the [HLS Ignited Program](https://github.com/microsoft/aihlsIgnited)**, a series of hands-on accelerators designed to democratize AI in healthcare. 
 
+[![YouTube](utils\images\youtube.png?raw=true)](https://www.youtube.com/watch?v=eJ_eS-V_Bvk)
+
 <div align="center">
-   <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank">
-      <img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg" alt="Watch the demo video on YouTube" style="max-width:100%; height:auto;">
-   </a>
-   <p><strong>Watch the demo video on YouTube</strong></p>
+
+**▶️ [Watch the demo video on YouTube](https://www.youtube.com/watch?v=eJ_eS-V_Bvk)**
+
 </div>
 
 **R&D AgenticRAG** is a multi‑Agent Agentic RAG System is an enterprise‑grade research assistant that harnesses a network of specialized AI agents to power complex R&D workflows. At its core, it uses **[Azure AI Agent Service](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)** and the **Semantic Kernel Agent Framework** to plan, coordinate, and refine multi‑step reasoning pipelines; security is enforced with **[OAuth 2.0 On‑Behalf‑Of (OBO) authentication](https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow)** to ensure each agent only accesses data the user is entitled to.
@@ -67,8 +68,7 @@ Multi-Agent Architecture = Σ (Production-Ready Single Agents [tools, memory, tr
 - **Azure Bing Retriever Agent**: 🧾 [Notebook – Connecting Real-Time Data to Your Agents](labs/04-azure-bing-retriever-agent.ipynb)  
   Connect to the Web, and surface latest news, research to add real-time context.
 
-- **Building MaS with Azure AI Agents & Semantic Kernel Agent Framework**: 🧾 [Notebook – Orchestrating Agents with Semantic Kernel](labs/05-semantic-kernel-agent-framework.ipynb)  
-  Use the Semantic Kernel SDK to build multi‑step workflows, chain prompts, and implement reflection loops.
+- **Building MaS with Azure AI Agents & Semantic Kernel Agent Framework**: 🧾 [Notebook – Orchestrating Agents with Semantic Kernel](labs/05-semantic-kernel-agent-framework.ipynb)  Use the Semantic Kernel SDK to build multi‑step workflows, chain prompts, and implement reflection loops.
 
 ### **🏭 Use Cases**
 
