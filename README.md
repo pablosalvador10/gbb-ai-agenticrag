@@ -6,7 +6,7 @@
 
 > This project is **part of the [HLS Ignited Program](https://github.com/microsoft/aihlsIgnited)**, a series of hands-on accelerators designed to democratize AI in healthcare. 
 
-[![YouTube](utils\images\youtube.png?raw=true)](https://www.youtube.com/watch?v=eJ_eS-V_Bvk)
+[![YouTube](https://github.com/pablosalvador10/gbb-ai-agenticrag/blob/9997a65135bdac229f6c48995ea00003534a9296/utils/images/youtube.png?raw=true)](https://www.youtube.com/watch?v=eJ_eS-V_Bvk)
 
 <div align="center">
 
