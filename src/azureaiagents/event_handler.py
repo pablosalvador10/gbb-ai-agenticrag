@@ -1,9 +1,17 @@
 # event_handler.py
 
 import logging
-from azure.ai.projects.models import AgentEventHandler, RunStep, RunStepDeltaChunk, ThreadMessage, ThreadRun, MessageDeltaChunk
+from azure.ai.projects.models import (
+    AgentEventHandler,
+    RunStep,
+    RunStepDeltaChunk,
+    ThreadMessage,
+    ThreadRun,
+    MessageDeltaChunk,
+)
 
 logger = logging.getLogger(__name__)
+
 
 class MyEventHandler(AgentEventHandler):
     """
@@ -45,7 +53,9 @@ class MyEventHandler(AgentEventHandler):
             logger.error(f"Agent run failed with error: {run.last_error}")
 
     def on_run_step(self, step: RunStep) -> None:
-        logger.debug(f"Run step type={step.type.name.lower()}, status={step.status.name.lower()}")
+        logger.debug(
+            f"Run step type={step.type.name.lower()}, status={step.status.name.lower()}"
+        )
 
     def on_run_step_delta(self, delta: RunStepDeltaChunk) -> None:
         if delta.delta.step_details and delta.delta.step_details.tool_calls:

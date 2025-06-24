@@ -142,7 +142,7 @@ class PolicyIndexingPipeline:
         self.indexer_client: SearchIndexerClient = SearchIndexerClient(
             endpoint=self.endpoint, credential=self.credential
         )
-        
+
     def upload_documents(self, local_path: str) -> None:
         """
         Upload PDF documents from a local directory to Azure Blob Storage.
@@ -167,15 +167,21 @@ class PolicyIndexingPipeline:
                             self.remote_document_path,
                             os.path.relpath(file_path, local_path),
                         )
-                        logger.info(f"Preparing to upload file: {file_path} to blob path: {blob_path}")
+                        logger.info(
+                            f"Preparing to upload file: {file_path} to blob path: {blob_path}"
+                        )
 
                         try:
                             blob_client = container_client.get_blob_client(blob_path)
                             with open(file_path, "rb") as data:
                                 blob_client.upload_blob(data, overwrite=True)
-                            logger.info(f"Successfully uploaded {file_path} to {blob_path}")
+                            logger.info(
+                                f"Successfully uploaded {file_path} to {blob_path}"
+                            )
                         except Exception as upload_error:
-                            logger.error(f"Failed to upload file {file_path} to {blob_path}: {upload_error}")
+                            logger.error(
+                                f"Failed to upload file {file_path} to {blob_path}: {upload_error}"
+                            )
                             raise
 
         except Exception as e:

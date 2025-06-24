@@ -21,5 +21,3 @@ def print_agent_summary(agent):
     print("Agent Metadata:")
     for key, value in agent.metadata.items():
         print(f"  - {key}: {value}")
-
-

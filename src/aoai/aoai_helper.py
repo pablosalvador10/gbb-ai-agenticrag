@@ -26,6 +26,7 @@ load_dotenv()
 # Set up logger
 logger = get_logger()
 
+
 class AzureOpenAIManager:
     """
     A manager class for interacting with the Azure OpenAI API.

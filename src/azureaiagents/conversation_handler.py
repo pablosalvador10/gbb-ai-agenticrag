@@ -7,9 +7,7 @@ from azure.ai.projects import AIProjectClient
 
 logger = logging.getLogger(__name__)
 
-###############################################################################
-# 1) Define a custom MyChatMessage class
-###############################################################################
+
 class MyChatMessage:
     """
     A simple message container class resembling a typical chat message.
@@ -20,14 +18,13 @@ class MyChatMessage:
         content (str): The textual content of the message.
         metadata (dict): Arbitrary metadata (e.g., status, references, etc.).
     """
+
     def __init__(self, role: str, content: str, metadata: Optional[Dict] = None):
         self.role = role
         self.content = content
         self.metadata = metadata or {}
 
-###############################################################################
-# 2) Utility functions
-###############################################################################
+
 def extract_bing_query(request_url: str) -> str:
     """
     Extracts a query string from Bing request URLs of the form:
@@ -39,20 +36,17 @@ def extract_bing_query(request_url: str) -> str:
         return match.group(1)
     return request_url
 
+
 def convert_dict_to_mychatmessage(msg: dict) -> MyChatMessage:
     """
     Converts a legacy dict-based message into a MyChatMessage object.
     If 'metadata' is present, it’s attached to MyChatMessage.metadata.
     """
     return MyChatMessage(
-        role=msg["role"],
-        content=msg["content"],
-        metadata=msg.get("metadata", {})
+        role=msg["role"], content=msg["content"], metadata=msg.get("metadata", {})
     )
 
-###############################################################################
-# 3) ConversationHandler for real-time event streaming
-###############################################################################
+
 class ConversationHandler:
     """
     Streams conversation events from an Azure AI Agent, handling partial tool calls
@@ -147,8 +141,8 @@ class ConversationHandler:
                 metadata={
                     "title": self.get_function_title(fn_name),
                     "status": "pending",
-                    "id": f"tool-{call_id}"
-                }
+                    "id": f"tool-{call_id}",
+                },
             )
             self.conversation.append(msg_obj)
             self.in_progress_tools[call_id] = msg_obj
@@ -183,8 +177,8 @@ class ConversationHandler:
                 metadata={
                     "title": self.get_function_title("bing_grounding"),
                     "status": "pending",
-                    "id": f"tool-{c_id}" if c_id else "tool-noid"
-                }
+                    "id": f"tool-{c_id}" if c_id else "tool-noid",
+                },
             )
             self.conversation.append(msg_obj)
             if c_id:
@@ -199,8 +193,8 @@ class ConversationHandler:
                 metadata={
                     "title": self.get_function_title("file_search"),
                     "status": "pending",
-                    "id": f"tool-{c_id}" if c_id else "tool-noid"
-                }
+                    "id": f"tool-{c_id}" if c_id else "tool-noid",
+                },
             )
             self.conversation.append(msg_obj)
             if c_id:
@@ -227,7 +221,9 @@ class ConversationHandler:
             # Accumulate partial data
             if index not in self.partial_calls_by_index:
                 self.partial_calls_by_index[index] = {"name": "", "args": ""}
-            self.accumulate_args(self.partial_calls_by_index[index], name_chunk, arg_chunk)
+            self.accumulate_args(
+                self.partial_calls_by_index[index], name_chunk, arg_chunk
+            )
             return
 
         # Ensure partial_calls_by_id has a dict
@@ -241,14 +237,16 @@ class ConversationHandler:
             self.partial_calls_by_id[final_call_id]["args"] += old_data.get("args", "")
 
         # Accumulate the new chunk
-        self.accumulate_args(self.partial_calls_by_id[final_call_id], name_chunk, arg_chunk)
+        self.accumulate_args(
+            self.partial_calls_by_id[final_call_id], name_chunk, arg_chunk
+        )
         self.finalize_tool_call(final_call_id)
 
     def stream_user_message(
-        self,
-        user_message: str,
-        history: List[dict]
-    ) -> Generator[Tuple[List[MyChatMessage], str], None, Tuple[List[MyChatMessage], str]]:
+        self, user_message: str, history: List[dict]
+    ) -> Generator[
+        Tuple[List[MyChatMessage], str], None, Tuple[List[MyChatMessage], str]
+    ]:
         """
         Streams partial conversation updates in real time.
 
@@ -281,11 +279,10 @@ class ConversationHandler:
         # Step B) Create user message in the Foundry agent's thread
         ########################################################################
         from azure.core.exceptions import HttpResponseError
+
         try:
             self.project_client.agents.create_message(
-                thread_id=self.thread_id,
-                role="user",
-                content=user_message
+                thread_id=self.thread_id, role="user", content=user_message
             )
         except HttpResponseError as e:
             logger.error(f"Failed to create user message: {e}")
@@ -298,7 +295,7 @@ class ConversationHandler:
             with self.project_client.agents.create_stream(
                 thread_id=self.thread_id,
                 assistant_id=self.agent_id,
-                event_handler=self.event_handler
+                event_handler=self.event_handler,
             ) as stream:
                 for item in stream:
                     # item is typically (event_type, event_data, ...)
@@ -324,7 +321,9 @@ class ConversationHandler:
                         step_status = event_data["status"]
 
                         if step_type == "tool_calls" and step_status == "in_progress":
-                            for tcall in event_data["step_details"].get("tool_calls", []):
+                            for tcall in event_data["step_details"].get(
+                                "tool_calls", []
+                            ):
                                 self.upsert_tool_call(tcall)
                             yield self.conversation, ""
 
@@ -337,13 +336,23 @@ class ConversationHandler:
                             self.call_id_for_index.clear()
                             yield self.conversation, ""
 
-                        elif step_type == "message_creation" and step_status == "in_progress":
-                            msg_id = event_data["step_details"]["message_creation"].get("message_id")
+                        elif (
+                            step_type == "message_creation"
+                            and step_status == "in_progress"
+                        ):
+                            msg_id = event_data["step_details"]["message_creation"].get(
+                                "message_id"
+                            )
                             if msg_id:
-                                self.conversation.append(MyChatMessage(role="assistant", content=""))
+                                self.conversation.append(
+                                    MyChatMessage(role="assistant", content="")
+                                )
                             yield self.conversation, ""
 
-                        elif step_type == "message_creation" and step_status == "completed":
+                        elif (
+                            step_type == "message_creation"
+                            and step_status == "completed"
+                        ):
                             yield self.conversation, ""
 
                     # 3) Partial assistant text
@@ -374,11 +383,14 @@ class ConversationHandler:
                                 or self.conversation[-1].role != "assistant"
                                 or (
                                     self.conversation[-1].metadata
-                                    and str(self.conversation[-1].metadata.get("id", ""))
-                                                        .startswith("tool-")
+                                    and str(
+                                        self.conversation[-1].metadata.get("id", "")
+                                    ).startswith("tool-")
                                 )
                             ):
-                                self.conversation.append(MyChatMessage(role="assistant", content=agent_msg))
+                                self.conversation.append(
+                                    MyChatMessage(role="assistant", content=agent_msg)
+                                )
                             else:
                                 self.conversation[-1].content += agent_msg
 
@@ -386,7 +398,10 @@ class ConversationHandler:
 
                     # 4) Entire assistant message completed
                     elif event_type == "thread.message":
-                        if event_data["role"] == "assistant" and event_data["status"] == "completed":
+                        if (
+                            event_data["role"] == "assistant"
+                            and event_data["status"] == "completed"
+                        ):
                             for cid, msg_obj in self.in_progress_tools.items():
                                 msg_obj.metadata["status"] = "done"
                             self.in_progress_tools.clear()

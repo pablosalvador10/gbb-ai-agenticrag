@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 
+
 class ToolRegistry:
     """
     A flexible registry for tool metadata. Each tool is identified by a tool_type

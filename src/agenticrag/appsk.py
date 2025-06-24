@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    st.session_state.chat_history = []
 
 # Agent name constants
 VERIFIER_NAME = "VerifierAgent"
@@ -25,8 +25,10 @@ SHAREPOINT_AGENT = "SharePointDataRetrievalAgent"
 FABRIC_AGENT = "FabricDataRetrievalAgent"
 WEB_AGENT = "BingDataRetrievalAgent"
 
+
 def create_kernel():
     from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
+
     kernel = Kernel()
     kernel.add_service(
         AzureChatCompletion(
@@ -37,6 +39,7 @@ def create_kernel():
         )
     )
     return kernel
+
 
 selection_function = KernelFunctionFromPrompt(
     function_name="selection",
@@ -72,6 +75,7 @@ termination_function = KernelFunctionFromPrompt(
     """,
 )
 
+
 async def main():
     st.set_page_config(page_title="R+D Intelligent Multi-Agent Assistant")
     st.markdown(
@@ -105,17 +109,18 @@ async def main():
         
         <div class="titleContainer">
             <h1>R+D Intelligent Assistant 🤖</h1>
-            <h3>powered by Azure AI Agent Service</h3>
+            <h3>powered by Azure AI Foundry Agent Service</h3>
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     # -------------------------------------------------
     # Create/Reuse the Azure client (avoid async with)
     # -------------------------------------------------
-    async with DefaultAzureCredential() as creds, AzureAIAgent.create_client(credential=creds) as client:
-
+    async with DefaultAzureCredential() as creds, AzureAIAgent.create_client(
+        credential=creds
+    ) as client:
         # Define agent IDs
         agents_ids = {
             SHAREPOINT_AGENT: "asst_kTtpnCZGYWammSC1PyYO6ljp",
@@ -155,13 +160,15 @@ async def main():
         You are an intelligent multi-agent R&D assistant designed to help Product Managers quickly access, integrate, and evaluate information from multiple specialized sources.
         Aim to support fast and accurate decision-making for R&D insights, leveraging internal and external data comprehensively and effectively.
         """
-     
+
         await st.session_state.chat.add_chat_message(SYSTEM_MESSAGE)
-     
+
         # First system message
         if not any(msg["role"] == "system" for msg in st.session_state.chat_history):
             # Add system message to local chat history
-            st.session_state.chat_history.append({"role": "system", "content": SYSTEM_MESSAGE})
+            st.session_state.chat_history.append(
+                {"role": "system", "content": SYSTEM_MESSAGE}
+            )
         # Chat interface
         user_input = st.chat_input("Ask your R+D query here...")
         chat_container = st.container(height=400)
@@ -171,7 +178,7 @@ async def main():
                 role = msg["role"]  # Could be "user", "system", or the agent's name
                 content = msg["content"]
                 avatar = msg.get("avatar", "🤖")
-        
+
                 if role.lower() == "user":
                     with st.chat_message("user", avatar="🧑‍💻"):
                         st.markdown(content, unsafe_allow_html=True)
@@ -185,50 +192,63 @@ async def main():
                     # For agent roles
                     with st.expander(f"{avatar} {role} says...", expanded=False):
                         st.markdown(content, unsafe_allow_html=True)
-        
+
         if user_input:
             # Add user to local chat history with role "user"
-            
-            st.session_state.chat_history.append({"role": "user", "content": user_input})
+
+            st.session_state.chat_history.append(
+                {"role": "user", "content": user_input}
+            )
             with chat_container:
                 with st.chat_message("user", avatar="🧑‍💻"):
                     st.markdown(user_input, unsafe_allow_html=True)
-        
+
                 await st.session_state.chat.add_chat_message(user_input)
-            
+
                 with st.spinner("Agents collaborating..."):
                     try:
                         combined_content = ""  # Ensure it's always defined
                         async for response in st.session_state.chat.invoke():
                             agent_name = response.name or "Agent"
                             avatar = (
-                                "📖" if agent_name == SHAREPOINT_AGENT
-                                else "🔎" if agent_name == WEB_AGENT
-                                else "🛠️" if agent_name == FABRIC_AGENT
+                                "📖"
+                                if agent_name == SHAREPOINT_AGENT
+                                else "🔎"
+                                if agent_name == WEB_AGENT
+                                else "🛠️"
+                                if agent_name == FABRIC_AGENT
                                 else "✅"
                             )
                             combined_content = response.content or ""
                             # Pass the agent’s name + content as the last message
-                            combined_content = f"[{agent_name}] {response.content or ''}"
+                            combined_content = (
+                                f"[{agent_name}] {response.content or ''}"
+                            )
 
                             # Handle citations
                             citations = []
                             if hasattr(response, "items"):
                                 for item in response.items:
                                     if item.content_type == "annotation" and item.url:
-                                        citations.append({"quote": item.quote, "url": item.url})
+                                        citations.append(
+                                            {"quote": item.quote, "url": item.url}
+                                        )
                             if citations:
                                 combined_content += "\n\n**Citations:**\n"
                                 for citation in citations:
-                                    combined_content += f"- **Quote**: {citation['quote']}  \n"
+                                    combined_content += (
+                                        f"- **Quote**: {citation['quote']}  \n"
+                                    )
                                     combined_content += f"  **URL**: [{citation['url']}]({citation['url']})\n"
 
                             # Save to history
-                            st.session_state.chat_history.append({
-                                "role": agent_name,
-                                "content": combined_content,
-                                "avatar": avatar,
-                            })
+                            st.session_state.chat_history.append(
+                                {
+                                    "role": agent_name,
+                                    "content": combined_content,
+                                    "avatar": avatar,
+                                }
+                            )
 
                             # Display each agent message immediately
                             with st.expander(f"{avatar} {agent_name} says..."):
@@ -243,14 +263,18 @@ async def main():
                         if combined_content:
                             with st.chat_message("assistant", avatar="🤖"):
                                 st.markdown(combined_content, unsafe_allow_html=True)
-                            st.session_state.chat_history.append({
-                                "role": "assistant",
-                                "content": combined_content,
-                                "avatar": "🤖",
-                            })
+                            st.session_state.chat_history.append(
+                                {
+                                    "role": "assistant",
+                                    "content": combined_content,
+                                    "avatar": "🤖",
+                                }
+                            )
+
 
 def run():
     asyncio.run(main())
+
 
 if __name__ == "__main__":
     run()

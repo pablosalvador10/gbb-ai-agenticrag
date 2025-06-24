@@ -5,6 +5,7 @@ from azure.core.exceptions import HttpResponseError
 from semantic_kernel.agents.azure_ai import AzureAIAgent, AzureAIAgentSettings
 from semantic_kernel.agents.open_ai.run_polling_options import RunPollingOptions
 
+
 def process_citations(content) -> str:
     """
     Return content plus any citations in Markdown format, ensuring no duplicated citations.
@@ -31,11 +32,8 @@ def process_citations(content) -> str:
 
     return combined_content
 
-async def run_agent(
-    project_client,
-    agent_id: str,
-    user_input: str
-) -> str:
+
+async def run_agent(project_client, agent_id: str, user_input: str) -> str:
     """
     Runs the data-retrieval agent to process a single user input and returns
     a single string containing both user input and the agent responses.
@@ -53,7 +51,7 @@ async def run_agent(
 
     # Fetch the agent definition using the provided ID
     agent_definition = await project_client.agents.get_agent(agent_id)
-    
+
     # Create the AzureAIAgent instance
     agent = AzureAIAgent(
         client=project_client,
@@ -67,7 +65,7 @@ async def run_agent(
     try:
         # Send user input to the agent
         await agent.add_chat_message(thread_id=thread.id, message=user_input)
-        
+
         # Stream non-tool responses from the agent
         async for content in agent.invoke(thread_id=thread.id):
             enriched_content = process_citations(content)

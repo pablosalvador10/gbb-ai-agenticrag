@@ -1,20 +1,21 @@
-SYSTEM_PROMPT_PLANNER = '''
+SYSTEM_PROMPT_PLANNER = """
 You are the Planner Agent within a Multi-Agent Agentic RAG System, responsible for intelligently selecting and coordinating specialized agents to answer complex product research and development queries.
 
 Your job is to determine **which agent(s)** should be used based on a **Tree of Thought reasoning process** and return a structured JSON response listing the relevant agents and a clear justification.
-'''
+"""
 
-SYSTEM_PROMPT_VERIFIER = '''
+SYSTEM_PROMPT_VERIFIER = """
 You are the **Verifier Agent** in a sophisticated multi-agent retrieval-augmented generation (RAG) architecture. 
 Your primary task is to verify whether the data retrieved from the three specialized agents below is sufficient, 
 accurate, coherent, and fully answers the user's original query.
-'''
+"""
 
 # Agent name constants
 VERIFIER_NAME = "VerifierAgent"
 SHAREPOINT_AGENT = "SharePointDataRetrievalAgent"
 FABRIC_AGENT = "FabricDataRetrievalAgent"
 WEB_AGENT = "BingDataRetrievalAgent"
+
 
 def generate_user_prompt(user_query: str) -> str:
     """
@@ -183,21 +184,21 @@ def generate_user_prompt(user_query: str) -> str:
     """
     return USER_PROMPT_PLANNER_TEMPLATE
 
-from typing import Optional
 
 from typing import Optional
 
-SYSTEM_PROMPT_VERIFIER = '''
+SYSTEM_PROMPT_VERIFIER = """
 You are the **Verifier Agent** in a sophisticated multi-agent retrieval-augmented generation (RAG) architecture. Your primary responsibility is to validate whether the data retrieved from specialized agents fully answers the user's query accurately, coherently, and without contradictions.
 
 Use the Tree of Thoughts reasoning method provided below, then respond strictly in the provided JSON format.
-'''
+"""
+
 
 def generate_verifier_prompt(
     user_query: str,
     fabric_data_summary: Optional[str] = None,
     sharepoint_data_summary: Optional[str] = None,
-    bing_data_summary: Optional[str] = None
+    bing_data_summary: Optional[str] = None,
 ) -> str:
     """
     Generates a structured prompt for the Verifier Agent, incorporating a clear Tree of Thoughts methodology.
@@ -214,14 +215,16 @@ def generate_verifier_prompt(
     sections = [
         "# 📩 **Verifier Agent: Data Verification Request**",
         f"## 🎯 **User Query:**\n```\n{user_query}\n```",
-        "## 📂 **Retrieved Data Summaries:**"
+        "## 📂 **Retrieved Data Summaries:**",
     ]
 
     if fabric_data_summary:
         sections.append(f"### 📊 **Fabric Data (Structured):**\n{fabric_data_summary}")
 
     if sharepoint_data_summary:
-        sections.append(f"### 📄 **SharePoint Data (Unstructured):**\n{sharepoint_data_summary}")
+        sections.append(
+            f"### 📄 **SharePoint Data (Unstructured):**\n{sharepoint_data_summary}"
+        )
 
     if bing_data_summary:
         sections.append(f"### 🌐 **Bing Data (Web-based):**\n{bing_data_summary}")
@@ -291,7 +294,8 @@ def generate_verifier_prompt(
 
     return "\n".join(sections)
 
-SYSTEM_PROMPT_SUMMARY = '''
+
+SYSTEM_PROMPT_SUMMARY = """
 You are the **Summary Agent** in a sophisticated multi-agent retrieval-augmented generation (RAG) architecture. 
 Your primary responsibility is to generate a concise, well-structured, and actionable summary based on the user's query 
 and the data retrieved from multiple agents.
@@ -332,9 +336,9 @@ The summary should be structured as follows:
 
 #### Conclusion:
 "Based on the retrieved data, Product A demonstrates superior performance with a latency of 10ms compared to Product B's 15ms. This is supported by internal research ('Product A vs Product B Performance Study') and external validation from TechReview. No additional data gaps were identified. The query has been fully addressed."
-'''
+"""
 
-USER_PROMPT_SUMMARY = '''
+USER_PROMPT_SUMMARY = """
 You are requesting a summary of the data retrieved from multiple agents (Fabric, SharePoint, Bing) to address your query. 
 Please ensure your query is clear and specific to help the agents provide the most relevant information.
 
@@ -352,9 +356,9 @@ Please ensure your query is clear and specific to help the agents provide the mo
 
 ### Example Query:
 "Compare the performance of Product A and Product B, and include any relevant internal R&D documents."
-'''
+"""
 
-SYSTEM_PROMPT_SUMMARY = '''
+SYSTEM_PROMPT_SUMMARY = """
 You are the **Summary Agent** in a multi-agent RAG system. Your job is to return a clear, concise, and well-structured final assistant message based on all agent insights.
 
 ### Key Responsibilities:
@@ -375,7 +379,8 @@ Product A outperforms Product B in latency tests, averaging 10ms compared to 15m
 - Fabric dataset: TrialResults2025
 - SharePoint: [PerformanceStudy2025.pdf](https://sharepoint.company.com/PerformanceStudy2025.pdf)
 - Bing: [TechReview Article](https://techreview.com/product-a-b-comparison)
-'''
+"""
+
 
 def generate_final_summary(user_query: str, dicta: dict) -> str:
     """
@@ -393,14 +398,11 @@ def generate_final_summary(user_query: str, dicta: dict) -> str:
 
     if FABRIC_AGENT in dicta:
         answer += f"- {dicta[FABRIC_AGENT].strip()}\n"
-        
 
     if SHAREPOINT_AGENT in dicta:
         answer += f"- {dicta[SHAREPOINT_AGENT].strip()}\n"
-       
 
     if WEB_AGENT in dicta:
         answer += f"- {dicta[WEB_AGENT].strip()}\n"
-    
 
     return answer

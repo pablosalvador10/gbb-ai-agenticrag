@@ -76,22 +76,7 @@ remove_conda_env:
 
 # Target to run the Streamlit app locally
 run_streamlit:
-	streamlit run src/chatapp/app.py
-
-streamlite_conf:
-	streamlit config show
-
-run_frontend_app:
-	$(PYTHON_INTERPRETER) app/frontend/streamlit/Home.py
-
-run_backend_paprocessing_api:
-	$(PYTHON_INTERPRETER) app/backend/paprocessing/app.py
-
-run_agentic_rag_evals:
-	$(PYTHON_INTERPRETER) src/pipeline/agenticRag/evals.py
-
-run_clinicalExtractor_evals:
-	$(PYTHON_INTERPRETER) src/pipeline/clinicalExtractor/evals.py
+	streamlit run src/agenticrag/app.py
 
 run_pylint:
 	@echo "Running linter"

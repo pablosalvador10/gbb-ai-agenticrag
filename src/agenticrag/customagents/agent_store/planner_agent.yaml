@@ -1,0 +1,24 @@
+# ---------------------------------------------------------------------
+# RTMedAgent – Planner Agent
+# ---------------------------------------------------------------------
+
+agent:
+  name: PlannerAgent
+  creator: Pablo Salvador
+  organization: GBB AI
+  description: |
+    Determines which specialized agents are needed for a given product R&D query 
+    using a Tree of Thought reasoning process, and returns a structured JSON list 
+    of selected agents with justification.
+
+model:
+  deployment_id: gpt-4o
+  temperature: 0.2
+  top_p: 0.7
+  max_tokens: 2048
+
+prompts:
+  system_path: planner_system.jinja2
+  user_path: user_planner.j2
+
+tools: []

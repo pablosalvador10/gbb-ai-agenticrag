@@ -6,14 +6,16 @@ from azure.identity.aio import DefaultAzureCredential
 from semantic_kernel.agents.azure_ai import AzureAIAgent
 from src.aoai.aoai_helper import AzureOpenAIManager
 import dotenv
-from src.chatapp.prompts import (generate_user_prompt, 
-                                 SYSTEM_PROMPT_PLANNER, 
-                                 SYSTEM_PROMPT_VERIFIER, 
-                                 generate_verifier_prompt,
-                                 generate_final_summary,
-                                 SYSTEM_PROMPT_SUMMARY)
+from src.agenticrag.prompts import (
+    generate_user_prompt,
+    SYSTEM_PROMPT_PLANNER,
+    SYSTEM_PROMPT_VERIFIER,
+    generate_verifier_prompt,
+    generate_final_summary,
+    SYSTEM_PROMPT_SUMMARY,
+)
 
-from src.chatapp.tools import run_agent
+from src.agenticrag.tools import run_agent
 
 from utils.ml_logging import get_logger
 
@@ -23,7 +25,7 @@ logger = get_logger()
 dotenv.load_dotenv(".env", override=True)
 
 if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    st.session_state.chat_history = []
 
 if "azure_openai_client" not in st.session_state:
     st.session_state["azure_openai_client"] = AzureOpenAIManager(
@@ -46,8 +48,11 @@ agents_ids = {
     WEB_AGENT: "asst_WLcRfqHJo7qS1V3wxK1S7f79",
 }
 
+
 async def main():
-    async with DefaultAzureCredential() as creds, AzureAIAgent.create_client(credential=creds) as client:
+    async with DefaultAzureCredential() as creds, AzureAIAgent.create_client(
+        credential=creds
+    ) as client:
         st.set_page_config(page_title="R+D Intelligent Multi-Agent Assistant")
         st.markdown(
             """
@@ -80,10 +85,10 @@ async def main():
             
             <div class="titleContainer">
                 <h1>R+D Intelligent Assistant 🤖</h1>
-                <h3>powered by Azure AI Agent Service</h3>
+                <h3>powered by Azure AI Foundry Agent Service</h3>
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
         user_input = st.chat_input("Ask your R+D query here...")
@@ -94,7 +99,7 @@ async def main():
                 role = msg["role"]  # Could be "user", "system", or the agent's name
                 content = msg["content"]
                 avatar = msg.get("avatar", "🤖")
-        
+
                 if role.lower() == "user":
                     with st.chat_message("user", avatar="🧑‍💻"):
                         st.markdown(content, unsafe_allow_html=True)
@@ -108,11 +113,13 @@ async def main():
                     # For agent roles
                     with st.expander(f"{avatar} {role} says...", expanded=False):
                         st.markdown(content, unsafe_allow_html=True)
-        
+
         MAX_RETRIES = 3
         if user_input:
-            st.session_state.chat_history.append({"role": "user", "content": user_input})
-            
+            st.session_state.chat_history.append(
+                {"role": "user", "content": user_input}
+            )
+
             with chat_container:
                 with st.chat_message("user", avatar="🧑‍💻"):
                     st.markdown(user_input, unsafe_allow_html=True)
@@ -128,11 +135,15 @@ async def main():
                                 query=generate_user_prompt(current_query),
                                 conversation_history=[],
                                 system_message_content=SYSTEM_PROMPT_PLANNER,
-                                response_format="json_object"
+                                response_format="json_object",
                             )
 
-                            if not agents or not agents['response'].get('agents_needed'):
-                                st.warning("No agents selected. Please refine your query.")
+                            if not agents or not agents["response"].get(
+                                "agents_needed"
+                            ):
+                                st.warning(
+                                    "No agents selected. Please refine your query."
+                                )
                                 break
 
                             st.info(
@@ -140,31 +151,37 @@ async def main():
                                 **Agents Selected:** {', '.join(agents['response']['agents_needed'])}  
                                 **Reason:** {agents['response']['justification']}
                                 """,
-                                icon="ℹ️"
+                                icon="ℹ️",
                             )
 
                             # Run the needed agents
-                            for agent in agents['response']['agents_needed']:
+                            for agent in agents["response"]["agents_needed"]:
                                 if agent in agents_ids:
                                     agent_id = agents_ids[agent]
                                     avatar = (
-                                        "📖" if agent == SHAREPOINT_AGENT
-                                        else "🔎" if agent == WEB_AGENT
-                                        else "🛠️" if agent == FABRIC_AGENT
-                                        else "✅")
+                                        "📖"
+                                        if agent == SHAREPOINT_AGENT
+                                        else "🔎"
+                                        if agent == WEB_AGENT
+                                        else "🛠️"
+                                        if agent == FABRIC_AGENT
+                                        else "✅"
+                                    )
                                     with st.expander(f"{avatar} {agent} says..."):
                                         response, threadID = await run_agent(
-                                            client,
-                                            agent_id,
-                                            current_query
+                                            client, agent_id, current_query
                                         )
                                         if response:
-                                            st.markdown(response, unsafe_allow_html=True)
-                                            st.session_state.chat_history.append({
-                                                "role": agent,
-                                                "content": response,
-                                                "avatar": avatar,
-                                            })
+                                            st.markdown(
+                                                response, unsafe_allow_html=True
+                                            )
+                                            st.session_state.chat_history.append(
+                                                {
+                                                    "role": agent,
+                                                    "content": response,
+                                                    "avatar": avatar,
+                                                }
+                                            )
                                             dicta[agent] = response
                                 else:
                                     st.error(f"Agent {agent} not found.")
@@ -175,30 +192,43 @@ async def main():
                                     current_query,
                                     fabric_data_summary=dicta.get(FABRIC_AGENT),
                                     sharepoint_data_summary=dicta.get(SHAREPOINT_AGENT),
-                                    bing_data_summary=dicta.get(WEB_AGENT)
+                                    bing_data_summary=dicta.get(WEB_AGENT),
                                 ),
                                 conversation_history=[],
                                 system_message_content=SYSTEM_PROMPT_VERIFIER,
                                 max_tokens=3000,
-                                response_format="json_object"
+                                response_format="json_object",
                             )
 
                             if evaluation:
-                                status = evaluation['response']['status']
-                                response_content = evaluation['response'].get('response', '')
-                                rewritten_query = evaluation['response'].get('rewritten_query', '')
+                                status = evaluation["response"]["status"]
+                                response_content = evaluation["response"].get(
+                                    "response", ""
+                                )
+                                rewritten_query = evaluation["response"].get(
+                                    "rewritten_query", ""
+                                )
 
                                 avatar = "✅" if status == "Approved" else "❌"
-                                content = response_content if status == "Approved" else rewritten_query
+                                content = (
+                                    response_content
+                                    if status == "Approved"
+                                    else rewritten_query
+                                )
 
                                 with st.expander(f"{avatar} {VERIFIER_NAME} says..."):
-                                    st.markdown(f"**{status}:** {content}", unsafe_allow_html=True)
+                                    st.markdown(
+                                        f"**{status}:** {content}",
+                                        unsafe_allow_html=True,
+                                    )
 
-                                st.session_state.chat_history.append({
-                                    "role": VERIFIER_NAME,
-                                    "content": content,
-                                    "avatar": avatar,
-                                })
+                                st.session_state.chat_history.append(
+                                    {
+                                        "role": VERIFIER_NAME,
+                                        "content": content,
+                                        "avatar": avatar,
+                                    }
+                                )
 
                                 if status == "Approved":
                                     break  # Successfully approved, stop retrying
@@ -207,43 +237,57 @@ async def main():
                                     if rewritten_query:
                                         # Update query for next retry
                                         current_query = rewritten_query
-                                        st.info(f"Verifier requested retry with rewritten query:\n\n{rewritten_query}")
-                                        st.session_state.chat_history.append({
-                                            "role": "system",
-                                            "content": f"Verifier requested retry with rewritten query:\n\n{rewritten_query}",
-                                            "avatar": "❌",
-                                        })
+                                        st.info(
+                                            f"Verifier requested retry with rewritten query:\n\n{rewritten_query}"
+                                        )
+                                        st.session_state.chat_history.append(
+                                            {
+                                                "role": "system",
+                                                "content": f"Verifier requested retry with rewritten query:\n\n{rewritten_query}",
+                                                "avatar": "❌",
+                                            }
+                                        )
                                     else:
-                                        st.warning("Verifier denied but no rewritten query provided.")
+                                        st.warning(
+                                            "Verifier denied but no rewritten query provided."
+                                        )
                                         break  # Can't retry without rewritten query
 
                                 if attempt == MAX_RETRIES:
-                                    st.warning("Maximum retries reached. Please refine your query or try again later.")
+                                    st.warning(
+                                        "Maximum retries reached. Please refine your query or try again later."
+                                    )
                         except Exception as e:
                             tb = traceback.format_exc()
                             st.error(f"Error: {e}\n\nTraceback:\n```\n{tb}\n```")
                             logger.error(f"Chat error: {e}\nDetailed traceback:\n{tb}")
-                            break 
+                            break
                 if dicta:
                     summary_content = await st.session_state.azure_openai_client.generate_chat_response(
-                            query=generate_final_summary(
-                                initial_message,
-                                dicta=dicta,
-                            ),
-                            conversation_history=[],
-                            system_message_content=SYSTEM_PROMPT_SUMMARY,
-                            max_tokens=3000)
+                        query=generate_final_summary(
+                            initial_message,
+                            dicta=dicta,
+                        ),
+                        conversation_history=[],
+                        system_message_content=SYSTEM_PROMPT_SUMMARY,
+                        max_tokens=3000,
+                    )
                     with st.chat_message("assistant", avatar="🤖"):
-                        st.markdown(summary_content['response'], unsafe_allow_html=True)
-                        st.session_state.chat_history.append({
-                            "role": "assistant",
-                            "content": summary_content['response'],
-                            "avatar": "🤖",
-                        })   
+                        st.markdown(summary_content["response"], unsafe_allow_html=True)
+                        st.session_state.chat_history.append(
+                            {
+                                "role": "assistant",
+                                "content": summary_content["response"],
+                                "avatar": "🤖",
+                            }
+                        )
 
                     st.toast(
                         "📧 An email with the results of your query has been sent!",
-                        icon="📩")  
+                        icon="📩",
+                    )
+
+
 def run():
     try:
         loop = asyncio.get_event_loop()
@@ -255,6 +299,7 @@ def run():
         asyncio.set_event_loop(loop)
 
     loop.run_until_complete(main())
+
 
 if __name__ == "__main__":
     run()

@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------
+# RTMedAgent – Verifier Agent
+# ---------------------------------------------------------------------
+
+agent:
+  name: VerifierAgent
+  creator: Pablo Salvador
+  organization: GBB AI
+  description: |
+    Validates that the data retrieved from each specialized agent (Fabric, SharePoint, Bing)
+    is sufficient, accurate, consistent, and fully answers the user's original query.
+
+model:
+  deployment_id: gpt-4o
+  temperature: 0.1
+  top_p: 0.8
+  max_tokens: 2048
+
+prompts:
+  system_path: verifier_system.j2
+  user_path: user_verifier.j2
+
+tools: []
