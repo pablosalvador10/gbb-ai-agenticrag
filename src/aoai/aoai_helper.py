@@ -340,194 +340,127 @@ class AzureOpenAIManager:
     async def generate_chat_response(
         self,
         query: str,
-        conversation_history: List[Dict[str, str]] = [],
-        image_paths: List[str] = None,
-        image_bytes: List[bytes] = None,
-        system_message_content: str = "You are an AI assistant that helps people find information. Please be precise, polite, and concise.",
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        image_paths: Optional[List[str]] = None,
+        image_bytes: Optional[List[bytes]] = None,
+        system_message_content: str = (
+            "You are an AI assistant that helps people find information. "
+            "Please be precise, polite, and concise."
+        ),
         temperature: float = 0.7,
         max_tokens: int = 150,
         seed: int = 42,
         top_p: float = 1.0,
         stream: bool = False,
-        tools: List[Dict[str, Any]] = None,
-        tool_choice: Union[str, Dict[str, Any]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Union[str, Dict[str, Any], None] = None,
         response_format: Union[str, Dict[str, Any]] = "text",
         **kwargs,
-    ) -> Optional[Union[str, Dict[str, Any]]]:
+    ) -> Optional[Dict[str, Any]]:
         """
-        Generates a text response considering the conversation history.
-
-        :param query: The latest query to generate a response for.
-        :param conversation_history: A list of message dictionaries representing the conversation history.
-        :param image_paths: A list of paths to images to include in the query.
-        :param image_bytes: A list of bytes of images to include in the query.
-        :param system_message_content: The content of the system message. Defaults to a generic assistant message.
-        :param temperature: Controls randomness in the output. Defaults to 0.7.
-        :param max_tokens: Maximum number of tokens to generate. Defaults to 150.
-        :param seed: Random seed for deterministic output. Defaults to 42.
-        :param top_p: The cumulative probability cutoff for token selection. Defaults to 1.0.
-        :param stream: Whether to stream the response. Defaults to False.
-        :param tools: A list of tools the model can use.
-        :param tool_choice: Controls which (if any) tool is called by the model. Can be "none", "auto", "required", or specify a particular tool.
-        :param response_format: Specifies the format of the response. Can be:
-            - A string: "text" or "json_object".
-            - A dictionary specifying a custom response format, including a JSON schema when needed.
-        :return: The generated text response as a string if response_format is "text", or a dictionary containing the response and conversation history if response_format is "json_object". Returns None if an error occurs.
+        Generate a chat completion from Azure OpenAI, with optional images/tools
+        and automatic handling of AOAI's JSON-response requirements.
         """
         start_time = time.time()
         logger.info(
-            f"Function generate_chat_response started at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}"
+            f"generate_chat_response ⏱️  {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}"
         )
 
-        try:
-            if tools is not None and tool_choice is None:
-                logger.debug(
-                    "Tools are provided but tool_choice is None. Setting tool_choice to 'auto'."
-                )
-                tool_choice = "auto"
-            else:
-                logger.debug(f"Tools: {tools}, Tool Choice: {tool_choice}")
+        conversation_history = conversation_history or []
 
-            system_message = {"role": "system", "content": system_message_content}
-            if not conversation_history or conversation_history[0] != system_message:
-                conversation_history.insert(0, system_message)
+        if tools is not None and tool_choice is None:
+            tool_choice = "auto"
 
-            user_message = {
+        needs_json = (
+            (response_format == "json_object")
+            or (isinstance(response_format, dict) and response_format.get("type") == "json_object")
+        )
+
+        if needs_json and "json" not in system_message_content.lower():
+            system_message_content = (
+                "Respond ONLY with valid JSON. " + system_message_content
+            )
+
+        system_msg = {"role": "system", "content": system_message_content}
+        if not conversation_history or conversation_history[0] != system_msg:
+            conversation_history.insert(0, system_msg)
+
+        # --- user message: text-only vs. multimodal -----------------------
+        if image_bytes or image_paths:
+            user_msg: Dict[str, Any] = {
                 "role": "user",
                 "content": [{"type": "text", "text": query}],
             }
-
+            # attach images
             if image_bytes:
-                for image in image_bytes:
-                    encoded_image = base64.b64encode(image).decode("utf-8")
-                    user_message["content"].append(
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{encoded_image}",
-                            },
-                        }
+                for img in image_bytes:
+                    b64 = base64.b64encode(img).decode("utf-8")
+                    user_msg["content"].append(
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
                     )
-            elif image_paths:
-                if isinstance(image_paths, str):
-                    image_paths = [image_paths]
-                for image_path in image_paths:
+            if image_paths:
+                for path in (image_paths if isinstance(image_paths, list) else [image_paths]):
                     try:
-                        with open(image_path, "rb") as image_file:
-                            encoded_image = base64.b64encode(image_file.read()).decode(
-                                "utf-8"
-                            )
-                            mime_type, _ = mimetypes.guess_type(image_path)
-                            logger.info(f"Image {image_path} type: {mime_type}")
-                            mime_type = mime_type or "application/octet-stream"
-                            user_message["content"].append(
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": f"data:{mime_type};base64,{encoded_image}",
-                                    },
-                                }
-                            )
-                    except Exception as e:
-                        logger.error(f"Error processing image {image_path}: {e}")
+                        with open(path, "rb") as fh:
+                            b64 = base64.b64encode(fh.read()).decode("utf-8")
+                        mime, _ = mimetypes.guess_type(path)
+                        mime = mime or "application/octet-stream"
+                        user_msg["content"].append(
+                            {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
+                        )
+                    except Exception as exc:
+                        logger.error(f"🔴 image error {path}: {exc}")
+        else:
+            # plain string so AOAI can scan for the word “json”
+            user_msg = {"role": "user", "content": query}
 
-            messages_for_api = conversation_history + [user_message]
-            logger.info(
-                f"Sending request to Azure OpenAI at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
-            )
+        messages = conversation_history + [user_msg]
 
-            if isinstance(response_format, str):
-                response_format_param = {"type": response_format}
-            elif isinstance(response_format, dict):
-                if response_format.get("type") == "json_schema":
-                    json_schema = response_format.get("json_schema", {})
-                    if json_schema.get("strict", False):
-                        if "name" not in json_schema or "schema" not in json_schema:
-                            raise ValueError(
-                                "When 'strict' is True, 'name' and 'schema' must be provided in 'json_schema'."
-                            )
-                response_format_param = response_format
-            else:
-                raise ValueError(
-                    "Invalid response_format. Must be a string or a dictionary."
-                )
+        if isinstance(response_format, str):
+            response_format_param = {"type": response_format}
+        elif isinstance(response_format, dict):
+            response_format_param = response_format
+        else:
+            raise ValueError("response_format must be str or dict")
+        
+        logger.info("Sending request to Azure OpenAI …")
+        response = self.openai_client.chat.completions.create(
+            model=self.chat_model_name,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            seed=seed,
+            top_p=top_p,
+            stream=stream,
+            tools=tools,
+            tool_choice=tool_choice,
+            response_format=response_format_param,
+            **kwargs,
+        )
 
-            response = self.openai_client.chat.completions.create(
-                model=self.chat_model_name,
-                messages=messages_for_api,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                seed=seed,
-                top_p=top_p,
-                stream=stream,
-                tools=tools,
-                response_format=response_format_param,
-                tool_choice=tool_choice,
-                **kwargs,
-            )
+        response_text = ""
+        if stream:
+            for event in response:
+                if event.choices and event.choices[0].delta and event.choices[0].delta.content:
+                    chunk = event.choices[0].delta.content
+                    print(chunk, end="", flush=True)
+                    response_text += chunk
+                    time.sleep(0.001)
+        else:
+            response_text = response.choices[0].message.content
 
-            if stream:
-                response_content = ""
-                for event in response:
-                    if event.choices:
-                        event_text = event.choices[0].delta
-                        if event_text is None or event_text.content is None:
-                            continue
-                        print(event_text.content, end="", flush=True)
-                        response_content += event_text.content
-                        time.sleep(0.001)  # Maintain minimal sleep to reduce latency
-            else:
-                response_content = response.choices[0].message.content
+        conversation_history.extend([user_msg, {"role": "assistant", "content": response_text}])
 
-            conversation_history.append(user_message)
-            conversation_history.append(
-                {"role": "assistant", "content": response_content}
-            )
+        logger.info(f"generate_chat_response ✅ in {time.time() - start_time:.2f}s")
 
-            end_time = time.time()
-            duration = end_time - start_time
-            logger.info(
-                f"Function generate_chat_response finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))} (Duration: {duration:.2f} seconds)"
-            )
-
-            if isinstance(response_format, str) and response_format == "json_object":
-                try:
-                    parsed_response = json.loads(response_content)
-                    return {
-                        "response": parsed_response,
-                        "conversation_history": conversation_history,
-                    }
-                except json.JSONDecodeError as e:
-                    logger.error(f"Failed to parse assistant's response as JSON: {e}")
-                    return {
-                        "response": response_content,
-                        "conversation_history": conversation_history,
-                    }
-            else:
-                return {
-                    "response": response_content,
-                    "conversation_history": conversation_history,
-                }
-
-        except openai.APIConnectionError as e:
-            logger.error("API Connection Error: The server could not be reached.")
-            logger.error(f"Error details: {e}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return None
-        except Exception as e:
-            error_message = str(e)
-            if "maximum context length" in error_message:
-                logger.warning(
-                    "Context length exceeded, reducing conversation history and retrying."
-                )
-                logger.warning(f"Error details: {e}")
-                return "maximum context length"
-            logger.error(
-                "Unexpected Error: An unexpected error occurred during contextual response generation."
-            )
-            logger.error(f"Error details: {e}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return None
+        if needs_json:
+            try:
+                parsed = json.loads(response_text)
+                return {"response": parsed, "conversation_history": conversation_history}
+            except json.JSONDecodeError as exc:
+                logger.error(f"JSON parse failed: {exc}")
+                # fall back to raw text
+        return {"response": response_text, "conversation_history": conversation_history}
 
     def generate_image(
         self,

@@ -76,7 +76,7 @@ remove_conda_env:
 
 # Target to run the Streamlit app locally
 run_streamlit:
-	streamlit run src/agenticrag/app.py
+	streamlit run usecases/agenticrag/app.py
 
 run_pylint:
 	@echo "Running linter"

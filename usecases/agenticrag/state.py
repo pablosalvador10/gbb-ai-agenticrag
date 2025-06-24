@@ -1,5 +1,5 @@
 import streamlit as st
-from src.agenticrag.settings import CHAT_HISTORY_KEY, AGENTS_KEY
+from usecases.agenticrag.settings import CHAT_HISTORY_KEY, AGENTS_KEY
 
 def init_session_state():
     if CHAT_HISTORY_KEY not in st.session_state:

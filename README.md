@@ -2,9 +2,9 @@
 
 ## **🤖🧠 R&D AgenticRAG: Adaptive Multi‑Agent Retrieval System for R&D Workflows**
 
-[![Azure AI Foundry Agent Service](https://img.shields.io/badge/Azure%20AI-Foundry%20Agent%20Service-4A90E2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)  [![Fabric Data Agent](https://img.shields.io/badge/Azure%20AI-Fabric%20Data%20Agent-%231072C2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/fabric?tabs=csharp&pivots=overview) [![Semantic Kernel](https://img.shields.io/badge/Semantic%20Kernel-4A90E2.svg?logo=github)](https://github.com/microsoft/semantic-kernel) [![HLS Ignited](https://img.shields.io/badge/HLS%20Ignited-blue.svg?logo=github)](https://github.com/microsoft/aihlsIgnited) [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![HLS Ignited](https://img.shields.io/badge/HLS%20Ignited-blue.svg?logo=github)](https://github.com/microsoft/aihlsIgnited) [![Azure AI Foundry Agent Service](https://img.shields.io/badge/Azure%20AI-Foundry%20Agent%20Service-4A90E2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)  [![Fabric Data Agent](https://img.shields.io/badge/Azure%20AI-Fabric%20Data%20Agent-%231072C2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/fabric?tabs=csharp&pivots=overview) [![Sharepoint Tool](https://img.shields.io/badge/Azure%20AI-SharepointTool-%231072C2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/tools/sharepoint)  [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> This project is **part of the [HLS Ignited Program](https://github.com/microsoft/aihlsIgnited)**, a series of hands-on accelerators designed to democratize AI in healthcare. 
+> This project is **part of the [HLS Ignited Program](https://github.com/microsoft/aihlsIgnited)**, a series of hands-on accelerators designed to accelerate the adoption of the latest Azure AI features in healthcare.
 
 [![YouTube](https://github.com/pablosalvador10/gbb-ai-agenticrag/blob/9997a65135bdac229f6c48995ea00003534a9296/utils/images/youtube.png?raw=true)](https://www.youtube.com/watch?v=eJ_eS-V_Bvk)
 

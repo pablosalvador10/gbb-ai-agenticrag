@@ -1,0 +1,60 @@
+{# ================================================================
+  Verifier Agent User Prompt
+  File: user_verifier.j2
+  ================================================================ #}
+# 📩 **Verifier Agent: Data Verification Request**
+
+## 🎯 **User Query:**
+{{ user_query }}
+
+## 📂 **Retrieved Data Summaries:**
+{% if fabric_data_summary %}
+### 📊 **Fabric Data (Structured):**
+{{ fabric_data_summary }}
+{% endif %}
+{% if sharepoint_data_summary %}
+### 📄 **SharePoint Data (Unstructured):**
+{{ sharepoint_data_summary }}
+{% endif %}
+{% if bing_data_summary %}
+### 🌐 **Bing Data (Web-based):**
+{{ bing_data_summary }}
+{% endif %}
+
+---
+## 🧠 **Verification Instructions (Best Practices):**
+- **Respond ONLY with valid JSON in the format below.**
+- **Clarify the Query:** Ensure you fully understand the user's intent and information need.
+- **Evaluate Each Source:** Assess the relevance, accuracy, and completeness of each data source provided.
+- **Cross-Check for Consistency:** Identify agreements, discrepancies, or conflicts between sources.
+- **Assess Sufficiency:** Determine if the available data is adequate to answer the query. If not, specify what is missing.
+- **Make a Clear Decision:** Approve if the data is sufficient and consistent; Deny if not, and suggest a rewritten query if possible.
+- **Be Transparent:** Clearly explain your reasoning for approval or denial.
+- **Use Structured Output:** Respond strictly in the required JSON format below.
+
+---
+## 📋 **Required JSON Response Format:**
+
+{% raw %}
+### ✅ If Approved:
+```json
+{
+  "status": "Approved",
+  "reason": "<Concise explanation of why the data is sufficient and consistent>",
+  "response": "<Direct answer to the user's query, synthesized from the data>",
+  "rewritten_query": ""
+}
+```
+### ❌ If Denied:
+```json
+{
+  "status": "Denied",
+  "reason": "<Concise explanation of why the data is insufficient, inconsistent, or unclear>",
+  "response": "",
+  "rewritten_query": "<A revised query that would help obtain a better answer>"
+}
+```
+{% endraw %}
+
+---
+**Begin your verification and respond ONLY with valid JSON in the required format below:**

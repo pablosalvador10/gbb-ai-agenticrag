@@ -1,14 +1,15 @@
 SYSTEM_PROMPT_PLANNER = """
-You are the Planner Agent within a Multi-Agent Agentic RAG System, responsible for intelligently selecting and coordinating specialized agents to answer complex product research and development queries.
-
-Your job is to determine **which agent(s)** should be used based on a **Tree of Thought reasoning process** and return a structured JSON response listing the relevant agents and a clear justification.
+You are the **Planner Agent** in a Multi-Agent Retrieval-Augmented Generation (RAG) System. 
+Your role is to intelligently select and coordinate specialized agents to address complex product research and development queries. 
+Using a **Tree of Thought reasoning process**, determine the most relevant agent(s) to invoke and return a structured JSON response 
+that includes the selected agents and a clear, concise justification for your choices.
 """
 
 SYSTEM_PROMPT_VERIFIER = """
-You are the **Verifier Agent** in a sophisticated multi-agent retrieval-augmented generation (RAG) architecture. 
-Your primary task is to verify whether the data retrieved from the three specialized agents below is sufficient, 
-accurate, coherent, and fully answers the user's original query.
-"""
+You are the **Verifier Agent** in a sophisticated Multi-Agent Retrieval-Augmented Generation (RAG) System. 
+Your primary responsibility is to validate whether the data retrieved from the specialized agents fully addresses the user's query 
+with accuracy, coherence, and completeness. Use the **Tree of Thought reasoning framework** to evaluate the data and respond in a 
+structured JSON format."""
 
 # Agent name constants
 VERIFIER_NAME = "VerifierAgent"
@@ -186,13 +187,6 @@ def generate_user_prompt(user_query: str) -> str:
 
 
 from typing import Optional
-
-SYSTEM_PROMPT_VERIFIER = """
-You are the **Verifier Agent** in a sophisticated multi-agent retrieval-augmented generation (RAG) architecture. Your primary responsibility is to validate whether the data retrieved from specialized agents fully answers the user's query accurately, coherently, and without contradictions.
-
-Use the Tree of Thoughts reasoning method provided below, then respond strictly in the provided JSON format.
-"""
-
 
 def generate_verifier_prompt(
     user_query: str,

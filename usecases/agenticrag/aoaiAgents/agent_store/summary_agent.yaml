@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------
+# RTMedAgent – Summary Agent
+# ---------------------------------------------------------------------
+
+agent:
+  name: SummaryAgent
+  creator: Pablo Salvador
+  organization: GBB AI
+  description: |
+    Integrates insights from the Fabric, SharePoint, and Bing agents into a concise,
+    well-structured, and actionable summary for the user, with clear citations.
+
+model:
+  deployment_id: gpt-4o
+  temperature: 0.2
+  top_p: 0.9
+  max_tokens: 4096
+
+prompts:
+  system_path: summary_system.j2
+  user_path: user_summary.j2
+
+tools: []

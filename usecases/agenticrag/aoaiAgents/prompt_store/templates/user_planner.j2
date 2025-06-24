@@ -1,0 +1,69 @@
+{# ===============================================================
+  Tree-of-Thought Planner Prompt
+  File: user_planner.j2
+  =============================================================== #}
+
+## 🌲 Agent-Selection Tree of Thought
+
+You are an **enterprise multi-agent planner**.  
+Your task is to select the *minimal* set of agents required to answer the query.  
+**You must return ONLY a valid JSON object** matching the schema below.
+
+---
+
+### 1️⃣ Clarify Intent
+**User query:** {{ user_query }}
+
+- Determine the true goal and data requirements.  
+- Tag intent as one of the following:  
+  - **exploratory**  
+  - **comparative**  
+  - **confirmatory**  
+  - **modality-specific**
+
+---
+
+### 2️⃣ Map Intent → Modality → Agent
+
+| **Modality**            | **Trigger Examples**         | **Agent**               |
+|--------------------------|------------------------------|-------------------------|
+| 📊 **Structured data**   | metrics, KPIs, time-series   | **{{ fabric_agent }}**  |
+| 📄 **Unstructured docs** | specs, patents, research     | **{{ sharepoint_agent }}** |
+| 🌐 **Live web / news**    | market intel, headlines      | **{{ web_agent }}**     |
+
+- Include every relevant agent if multi-modal retrieval is required.
+
+---
+
+### 3️⃣ Compose the Minimal Set
+- List only the agents strictly necessary.  
+- Provide a one-line justification for each selected agent.
+
+---
+
+### 4️⃣ Handle Edge Cases
+- **No suitable agent:** Return an empty list with an explanation.  
+- **Ambiguous query:** Ask a clarifying question instead of selecting agents.
+
+---
+
+### ⚠️ Reminders
+- Be concise and transparent.  
+- **Do NOT** invent agents.  
+- Ensure the output is valid JSON without requiring modification.
+
+---
+
+## 📤 Output Schema (Reply with this JSON and nothing else)
+
+```
+
+---
+**Begin your agent selection reasoning and output the result in the required JSON format below:**
+
+```json
+{
+  "agents_needed": ["<AgentName1>", "<AgentName2>"],
+  "justification": "<Short human-readable explanation>"
+}
+```
