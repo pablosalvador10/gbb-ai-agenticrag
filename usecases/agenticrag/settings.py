@@ -2,6 +2,7 @@ import os
 
 # Load environment variables early
 from dotenv import load_dotenv
+
 load_dotenv(".env", override=True)
 
 # Streamlit session keys

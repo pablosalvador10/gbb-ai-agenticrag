@@ -10,6 +10,7 @@ import time
 import traceback
 from io import BytesIO
 from typing import Any, Dict, List, Literal, Optional, Union
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import openai
@@ -371,9 +372,9 @@ class AzureOpenAIManager:
         if tools is not None and tool_choice is None:
             tool_choice = "auto"
 
-        needs_json = (
-            (response_format == "json_object")
-            or (isinstance(response_format, dict) and response_format.get("type") == "json_object")
+        needs_json = (response_format == "json_object") or (
+            isinstance(response_format, dict)
+            and response_format.get("type") == "json_object"
         )
 
         if needs_json and "json" not in system_message_content.lower():
@@ -396,17 +397,25 @@ class AzureOpenAIManager:
                 for img in image_bytes:
                     b64 = base64.b64encode(img).decode("utf-8")
                     user_msg["content"].append(
-                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                        }
                     )
             if image_paths:
-                for path in (image_paths if isinstance(image_paths, list) else [image_paths]):
+                for path in (
+                    image_paths if isinstance(image_paths, list) else [image_paths]
+                ):
                     try:
                         with open(path, "rb") as fh:
                             b64 = base64.b64encode(fh.read()).decode("utf-8")
                         mime, _ = mimetypes.guess_type(path)
                         mime = mime or "application/octet-stream"
                         user_msg["content"].append(
-                            {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:{mime};base64,{b64}"},
+                            }
                         )
                     except Exception as exc:
                         logger.error(f"🔴 image error {path}: {exc}")
@@ -422,7 +431,7 @@ class AzureOpenAIManager:
             response_format_param = response_format
         else:
             raise ValueError("response_format must be str or dict")
-        
+
         logger.info("Sending request to Azure OpenAI …")
         response = self.openai_client.chat.completions.create(
             model=self.chat_model_name,
@@ -441,7 +450,11 @@ class AzureOpenAIManager:
         response_text = ""
         if stream:
             for event in response:
-                if event.choices and event.choices[0].delta and event.choices[0].delta.content:
+                if (
+                    event.choices
+                    and event.choices[0].delta
+                    and event.choices[0].delta.content
+                ):
                     chunk = event.choices[0].delta.content
                     print(chunk, end="", flush=True)
                     response_text += chunk
@@ -449,14 +462,19 @@ class AzureOpenAIManager:
         else:
             response_text = response.choices[0].message.content
 
-        conversation_history.extend([user_msg, {"role": "assistant", "content": response_text}])
+        conversation_history.extend(
+            [user_msg, {"role": "assistant", "content": response_text}]
+        )
 
         logger.info(f"generate_chat_response ✅ in {time.time() - start_time:.2f}s")
 
         if needs_json:
             try:
                 parsed = json.loads(response_text)
-                return {"response": parsed, "conversation_history": conversation_history}
+                return {
+                    "response": parsed,
+                    "conversation_history": conversation_history,
+                }
             except json.JSONDecodeError as exc:
                 logger.error(f"JSON parse failed: {exc}")
                 # fall back to raw text

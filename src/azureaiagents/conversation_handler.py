@@ -1,9 +1,9 @@
-import re
 import logging
-from typing import List, Dict, Generator, Tuple, Optional, Any
+import re
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
-from azure.core.exceptions import HttpResponseError
 from azure.ai.projects import AIProjectClient
+from azure.core.exceptions import HttpResponseError
 
 logger = logging.getLogger(__name__)
 

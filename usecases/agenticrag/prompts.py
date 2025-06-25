@@ -1,7 +1,8 @@
 from .settings import (
-    AZURE_AI_FOUNDRY_SHAREPOINT_AGENT,
     AZURE_AI_FOUNDRY_FABRIC_AGENT,
-    AZURE_AI_FOUNDRY_WEB_AGENT)
+    AZURE_AI_FOUNDRY_SHAREPOINT_AGENT,
+    AZURE_AI_FOUNDRY_WEB_AGENT,
+)
 
 SYSTEM_PROMPT_PLANNER = """
 You are the **Planner Agent** in a Multi-Agent Retrieval-Augmented Generation (RAG) System. 
@@ -15,6 +16,7 @@ You are the **Verifier Agent** in a sophisticated Multi-Agent Retrieval-Augmente
 Your primary responsibility is to validate whether the data retrieved from the specialized agents fully addresses the user's query 
 with accuracy, coherence, and completeness. Use the **Tree of Thought reasoning framework** to evaluate the data and respond in a 
 structured JSON format."""
+
 
 def generate_user_prompt(user_query: str) -> str:
     """
@@ -185,6 +187,7 @@ def generate_user_prompt(user_query: str) -> str:
 
 
 from typing import Optional
+
 
 def generate_verifier_prompt(
     user_query: str,

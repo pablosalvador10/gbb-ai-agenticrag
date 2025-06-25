@@ -1,13 +1,14 @@
 # event_handler.py
 
 import logging
+
 from azure.ai.projects.models import (
     AgentEventHandler,
+    MessageDeltaChunk,
     RunStep,
     RunStepDeltaChunk,
     ThreadMessage,
     ThreadRun,
-    MessageDeltaChunk,
 )
 
 logger = logging.getLogger(__name__)

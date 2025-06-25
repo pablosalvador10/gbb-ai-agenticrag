@@ -1,17 +1,17 @@
 # toolset.py
 
-import os
 import logging
-from typing import Optional, List, Any
+import os
+from typing import Any, List, Optional
 
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import (
-    BingGroundingTool,
     AzureAISearchTool,
-    FileSearchTool,
-    SharepointTool,
+    BingGroundingTool,
     FabricTool,
+    FileSearchTool,
     FunctionTool,
+    SharepointTool,
     ToolSet,
 )
 

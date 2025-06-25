@@ -1,10 +1,11 @@
-import os
 import json
 import logging
-from typing import Set, Tuple, Optional
-from azure.core.exceptions import ServiceRequestError, HttpResponseError
-from azure.identity import DefaultAzureCredential
+import os
+from typing import Optional, Set, Tuple
+
 from azure.ai.projects import AIProjectClient
+from azure.core.exceptions import HttpResponseError, ServiceRequestError
+from azure.identity import DefaultAzureCredential
 
 
 def process_citations(text_msg) -> str:
@@ -46,7 +47,9 @@ def run_agent(
         )
 
         # 2) run & wait
-        project_client.agents.create_and_process_run(thread_id=thread.id, agent_id=agent_id)
+        project_client.agents.create_and_process_run(
+            thread_id=thread.id, agent_id=agent_id
+        )
 
         # 3) collect & enrich only true assistant messages
         responses = ""

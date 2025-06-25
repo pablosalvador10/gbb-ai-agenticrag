@@ -1,8 +1,10 @@
-import os
 import asyncio
-import streamlit as st
+import os
 import traceback
+
+import streamlit as st
 from azure.identity.aio import DefaultAzureCredential
+from dotenv import load_dotenv
 from semantic_kernel import Kernel
 from semantic_kernel.agents import AgentGroupChat
 from semantic_kernel.agents.azure_ai import AzureAIAgent
@@ -10,9 +12,8 @@ from semantic_kernel.agents.strategies import (
     KernelFunctionSelectionStrategy,
     KernelFunctionTerminationStrategy,
 )
-from semantic_kernel.functions import KernelFunctionFromPrompt
 from semantic_kernel.contents import ChatHistoryTruncationReducer
-from dotenv import load_dotenv
+from semantic_kernel.functions import KernelFunctionFromPrompt
 
 load_dotenv()
 
@@ -213,11 +214,11 @@ async def main():
                             avatar = (
                                 "📖"
                                 if agent_name == SHAREPOINT_AGENT
-                                else "🔎"
-                                if agent_name == WEB_AGENT
-                                else "🛠️"
-                                if agent_name == FABRIC_AGENT
-                                else "✅"
+                                else (
+                                    "🔎"
+                                    if agent_name == WEB_AGENT
+                                    else "🛠️" if agent_name == FABRIC_AGENT else "✅"
+                                )
                             )
                             combined_content = response.content or ""
                             # Pass the agent’s name + content as the last message

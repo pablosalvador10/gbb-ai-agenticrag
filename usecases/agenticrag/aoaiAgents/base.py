@@ -11,9 +11,10 @@ New in this version
 """
 
 import os
-import yaml
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+import yaml
 
 from src.aoai.aoai_helper import AzureOpenAIManager
 from usecases.agenticrag.aoaiAgents.prompt_store.prompt_manager import PromptManager
@@ -45,10 +46,24 @@ class AzureOpenAIAgent:
                 raise RuntimeError(f"Failed to load YAML config: {e}")
             self._validate_cfg()
             m = self._cfg["model"]
-            self.api_key = api_key or self._cfg.get("api_key") or os.getenv("AZURE_OPENAI_KEY")
-            self.api_version = api_version or self._cfg.get("api_version") or os.getenv("AZURE_OPENAI_API_VERSION")
-            self.azure_endpoint = azure_endpoint or self._cfg.get("azure_endpoint") or os.getenv("AZURE_OPENAI_API_ENDPOINT")
-            self.chat_model_name = chat_model_name or m["deployment_id"] or os.getenv("AZURE_AOAI_CHAT_MODEL_NAME_DEPLOYMENT_ID")
+            self.api_key = (
+                api_key or self._cfg.get("api_key") or os.getenv("AZURE_OPENAI_KEY")
+            )
+            self.api_version = (
+                api_version
+                or self._cfg.get("api_version")
+                or os.getenv("AZURE_OPENAI_API_VERSION")
+            )
+            self.azure_endpoint = (
+                azure_endpoint
+                or self._cfg.get("azure_endpoint")
+                or os.getenv("AZURE_OPENAI_API_ENDPOINT")
+            )
+            self.chat_model_name = (
+                chat_model_name
+                or m["deployment_id"]
+                or os.getenv("AZURE_AOAI_CHAT_MODEL_NAME_DEPLOYMENT_ID")
+            )
             self.metadata = self._cfg.get("agent", {})
             # Capture system and user prompt paths if present
             prompts_cfg = self._cfg.get("prompts", {})
@@ -57,8 +72,12 @@ class AzureOpenAIAgent:
         else:
             self.api_key = api_key or os.getenv("AZURE_OPENAI_KEY")
             self.api_version = api_version or os.getenv("AZURE_OPENAI_API_VERSION")
-            self.azure_endpoint = azure_endpoint or os.getenv("AZURE_OPENAI_API_ENDPOINT")
-            self.chat_model_name = chat_model_name or os.getenv("AZURE_AOAI_CHAT_MODEL_NAME_DEPLOYMENT_ID")
+            self.azure_endpoint = azure_endpoint or os.getenv(
+                "AZURE_OPENAI_API_ENDPOINT"
+            )
+            self.chat_model_name = chat_model_name or os.getenv(
+                "AZURE_AOAI_CHAT_MODEL_NAME_DEPLOYMENT_ID"
+            )
             self.metadata = {}
         self.aoai = AzureOpenAIManager(
             api_key=self.api_key,

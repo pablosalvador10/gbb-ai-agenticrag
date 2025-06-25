@@ -1,33 +1,37 @@
 import asyncio
-import os
-import streamlit as st
-import traceback
 import json
-from typing import Any, Dict, List, Optional, Tuple
-from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
-from src.aoai.aoai_helper import AzureOpenAIManager
+import os
 import time
-from concurrent.futures import TimeoutError as FuturesTimeout, ThreadPoolExecutor, as_completed
+import traceback
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeout
+from concurrent.futures import as_completed
+from typing import Any, Dict, List, Optional, Tuple
+
 import dotenv
+import streamlit as st
+from azure.ai.projects import AIProjectClient
+from azure.identity import DefaultAzureCredential
+
+from src.aoai.aoai_helper import AzureOpenAIManager
 from usecases.agenticrag.aoaiAgents.base import AzureOpenAIAgent
 from usecases.agenticrag.prompts import (
-    generate_user_prompt,
     SYSTEM_PROMPT_PLANNER,
-    SYSTEM_PROMPT_VERIFIER,
-    generate_verifier_prompt,
-    generate_final_summary,
     SYSTEM_PROMPT_SUMMARY,
+    SYSTEM_PROMPT_VERIFIER,
+    generate_final_summary,
+    generate_user_prompt,
+    generate_verifier_prompt,
 )
 from usecases.agenticrag.settings import (
     AZURE_AI_FOUNDRY_AGENT_IDS,
-    VERIFIER_AGENT,
-    PLANNER_AGENT,
-    SUMMARY_AGENT,
-    AZURE_AI_FOUNDRY_SHAREPOINT_AGENT,
     AZURE_AI_FOUNDRY_FABRIC_AGENT,
+    AZURE_AI_FOUNDRY_SHAREPOINT_AGENT,
     AZURE_AI_FOUNDRY_WEB_AGENT,
     CUSTOM_AGENT_NAMES,
+    PLANNER_AGENT,
+    SUMMARY_AGENT,
+    VERIFIER_AGENT,
 )
 from usecases.agenticrag.tools import run_agent
 from utils.ml_logging import get_logger
@@ -40,60 +44,65 @@ AgentStatusDict = Dict[str, str]
 AgentResponseDict = Dict[str, Optional[str]]
 
 # --- UI Constants ---
-PLANNER  = "PlannerAgent"
-SP       = "SharePointDataRetrievalAgent"
-WEB      = "BingDataRetrievalAgent"
-FAB      = "FabricDataRetrievalAgent"
-VERIFY   = "VerifierAgent"
-SUMMARY  = "SummaryAgent"
+PLANNER = "PlannerAgent"
+SP = "SharePointDataRetrievalAgent"
+WEB = "BingDataRetrievalAgent"
+FAB = "FabricDataRetrievalAgent"
+VERIFY = "VerifierAgent"
+SUMMARY = "SummaryAgent"
 
 ICONS = {
     PLANNER: "🧩",
-    SP:      "📖",
-    WEB:     "🔎",
-    FAB:     "🛠️",
-    VERIFY:  "✅",
+    SP: "📖",
+    WEB: "🔎",
+    FAB: "🛠️",
+    VERIFY: "✅",
     SUMMARY: "📝",
 }
 LABELS = {
     PLANNER: "Planner",
-    SP:      "SP",
-    WEB:     "Bing",
-    FAB:     "Fabric",
-    VERIFY:  "Verifier",
+    SP: "SP",
+    WEB: "Bing",
+    FAB: "Fabric",
+    VERIFY: "Verifier",
     SUMMARY: "Summ..",
 }
 
 WIDTH, HEIGHT = 300, 420
 NODE_W, NODE_H = 96, 36
-COL_LEFT   = 20
+COL_LEFT = 20
 COL_CENTER = WIDTH // 2 - NODE_W // 2
-COL_RIGHT  = WIDTH - NODE_W - 20
+COL_RIGHT = WIDTH - NODE_W - 20
 
 NODE_POS = {
     PLANNER: (COL_CENTER, 24),
-    SP:      (COL_LEFT,   120),
-    WEB:     (COL_CENTER, 120),
-    FAB:     (COL_RIGHT, 120),
-    VERIFY:  (COL_CENTER, 230),
+    SP: (COL_LEFT, 120),
+    WEB: (COL_CENTER, 120),
+    FAB: (COL_RIGHT, 120),
+    VERIFY: (COL_CENTER, 230),
     SUMMARY: (COL_CENTER, 335),
 }
 
 EDGES = [
-    (PLANNER, SP), (PLANNER, WEB), (PLANNER, FAB),
-    (SP, VERIFY),  (WEB, VERIFY),   (FAB, VERIFY),
+    (PLANNER, SP),
+    (PLANNER, WEB),
+    (PLANNER, FAB),
+    (SP, VERIFY),
+    (WEB, VERIFY),
+    (FAB, VERIFY),
     (VERIFY, SUMMARY),
 ]
 
 # restore glow and approved color
 STATUS_COLOURS = {
-    "pending":  ("#f5f5f5", "#9e9e9e", ""),
-    "running":  ("#fff7d1", "#e6b800", "0 0 16px 4px #ffe066"),
-    "done":     ("#e8f5e9", "#00b050", "0 0 10px 2px #b2f2bb"),
-    "error":    ("#ffebee", "#d32f2f", "0 0 16px 4px #ff6b6b"),
-    "denied":   ("#ffebee", "#d32f2f", "0 0 16px 4px #ff6b6b"),
+    "pending": ("#f5f5f5", "#9e9e9e", ""),
+    "running": ("#fff7d1", "#e6b800", "0 0 16px 4px #ffe066"),
+    "done": ("#e8f5e9", "#00b050", "0 0 10px 2px #b2f2bb"),
+    "error": ("#ffebee", "#d32f2f", "0 0 16px 4px #ff6b6b"),
+    "denied": ("#ffebee", "#d32f2f", "0 0 16px 4px #ff6b6b"),
     "approved": ("#e8f5e9", "#00b050", "0 0 16px 4px #69f0ae"),
-} 
+}
+
 
 def setup_environment() -> None:
     """Initialize environment variables and session state."""
@@ -115,6 +124,7 @@ def setup_environment() -> None:
             logger.info(f"Loading agent '{agent_key}' from config: {config_path}")
             st.session_state[agent_key] = AzureOpenAIAgent(config_path=config_path)
 
+
 def render_chat_history(chat_container: Any) -> None:
     """Render the chat history in the Streamlit container."""
     logger.debug("Rendering chat history.")
@@ -135,6 +145,7 @@ def render_chat_history(chat_container: Any) -> None:
         else:  # agent responses
             with st.expander(f"{avatar} {msg['role']} says...", expanded=False):
                 st.markdown(content, unsafe_allow_html=True)
+
 
 def select_agents(current_query: str) -> Optional[Dict[str, Any]]:
     """Select which agents are needed for the query."""
@@ -163,7 +174,7 @@ def select_agents(current_query: str) -> Optional[Dict[str, Any]]:
         st.info(
             f"**Agents Selected:** {', '.join(agents['response']['agents_needed'])}\n"
             f"**Justification:** {agents['response']['justification']}",
-            icon="ℹ️"
+            icon="ℹ️",
         )
         return agents
 
@@ -172,7 +183,10 @@ def select_agents(current_query: str) -> Optional[Dict[str, Any]]:
         logger.exception("Planner agent selection failed")
         return None
 
-def run_selected_agents(agents_needed: List[str], current_query: str) -> AgentResponseDict:
+
+def run_selected_agents(
+    agents_needed: List[str], current_query: str
+) -> AgentResponseDict:
     """Run selected retriever agents in parallel and return their responses."""
     logger.info(f"Running agents in parallel: {agents_needed}")
     dicta: AgentResponseDict = {}
@@ -198,13 +212,17 @@ def run_selected_agents(agents_needed: List[str], current_query: str) -> AgentRe
                 continue
 
             fid = AZURE_AI_FOUNDRY_AGENT_IDS[ag]
-            fut = executor.submit(worker, fid, current_query, st.session_state.project_client, ag)
+            fut = executor.submit(
+                worker, fid, current_query, st.session_state.project_client, ag
+            )
             future_map[fut] = ag
 
         for fut in as_completed(future_map):
             ag = future_map[fut]
             status_flag, err, (resp, _) = fut.result()
-            local_status[ag] = "done" if status_flag == "running" and resp else status_flag
+            local_status[ag] = (
+                "done" if status_flag == "running" and resp else status_flag
+            )
             render_agent_mind_map({**st.session_state.agent_status, **local_status})
             results.append((ag, resp, err))
 
@@ -221,12 +239,14 @@ def run_selected_agents(agents_needed: List[str], current_query: str) -> AgentRe
             else:
                 st.markdown(resp, unsafe_allow_html=True)
 
-        st.session_state.chat_history.append({
-            "role": ag,
-            "content": err or resp or "No response",
-            "avatar": avatar,
-            "error": bool(err or resp is None),
-        })
+        st.session_state.chat_history.append(
+            {
+                "role": ag,
+                "content": err or resp or "No response",
+                "avatar": avatar,
+                "error": bool(err or resp is None),
+            }
+        )
         if resp:
             dicta[ag] = resp
 
@@ -237,7 +257,10 @@ def run_selected_agents(agents_needed: List[str], current_query: str) -> AgentRe
     logger.info(f"Collected retriever responses: {list(dicta.keys())}")
     return dicta
 
-def evaluate_with_verifier(current_query: str, dicta: AgentResponseDict) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+
+def evaluate_with_verifier(
+    current_query: str, dicta: AgentResponseDict
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Run verifier agent and return its decision."""
     logger.info("Running verifier agent")
     st.session_state.agent_status[VERIFY] = "running"
@@ -249,7 +272,9 @@ def evaluate_with_verifier(current_query: str, dicta: AgentResponseDict) -> Tupl
                 user_prompt=generate_verifier_prompt(
                     current_query,
                     fabric_data_summary=dicta.get(AZURE_AI_FOUNDRY_FABRIC_AGENT),
-                    sharepoint_data_summary=dicta.get(AZURE_AI_FOUNDRY_SHAREPOINT_AGENT),
+                    sharepoint_data_summary=dicta.get(
+                        AZURE_AI_FOUNDRY_SHAREPOINT_AGENT
+                    ),
                     bing_data_summary=dicta.get(AZURE_AI_FOUNDRY_WEB_AGENT),
                 ),
                 conversation_history=[],
@@ -287,23 +312,32 @@ def evaluate_with_verifier(current_query: str, dicta: AgentResponseDict) -> Tupl
     resp_txt = response_obj.get("response", "")
     rewritten_query = response_obj.get("rewritten_query", "")
 
-    st.session_state.agent_status[VERIFY] = "approved" if status == "Approved" else "denied"
+    st.session_state.agent_status[VERIFY] = (
+        "approved" if status == "Approved" else "denied"
+    )
     render_agent_mind_map(st.session_state.agent_status)
 
     avatar = "✅" if status == "Approved" else "❌"
     with st.expander(f"{avatar} {VERIFY} says...", expanded=False):
-        st.markdown(f"**{status}:** {resp_txt if status == 'Approved' else rewritten_query}",
-                    unsafe_allow_html=True)
+        st.markdown(
+            f"**{status}:** {resp_txt if status == 'Approved' else rewritten_query}",
+            unsafe_allow_html=True,
+        )
 
-    st.session_state.chat_history.append({
-        "role": VERIFY,
-        "content": resp_txt if status == "Approved" else rewritten_query,
-        "avatar": avatar,
-    })
+    st.session_state.chat_history.append(
+        {
+            "role": VERIFY,
+            "content": resp_txt if status == "Approved" else rewritten_query,
+            "avatar": avatar,
+        }
+    )
 
-    return status, resp_txt, rewritten_query 
+    return status, resp_txt, rewritten_query
 
-def summarize_results(initial_message: str, dicta: AgentResponseDict, chat_container: Any) -> None:
+
+def summarize_results(
+    initial_message: str, dicta: AgentResponseDict, chat_container: Any
+) -> None:
     """Summarize results and reply as assistant."""
     logger.info("Running summary agent")
     st.session_state.agent_status[SUMMARY] = "running"
@@ -337,12 +371,15 @@ def summarize_results(initial_message: str, dicta: AgentResponseDict, chat_conta
     with chat_container:
         with st.chat_message("assistant", avatar="🤖"):
             st.markdown(summary_resp, unsafe_allow_html=True)
-    st.session_state.chat_history.append({
-        "role": "assistant",
-        "content": summary_resp,
-        "avatar": "🤖",
-    })
+    st.session_state.chat_history.append(
+        {
+            "role": "assistant",
+            "content": summary_resp,
+            "avatar": "🤖",
+        }
+    )
     st.toast("📧 An email with the results of your query has been sent!", icon="📩")
+
 
 STYLE_FLOAT = f"""
 <style>
@@ -368,6 +405,7 @@ STYLE_FLOAT = f"""
 </style>
 """
 
+
 def render_agent_mind_map(status_dict: AgentStatusDict) -> None:
     """Render the agent mind map visualization."""
     if not status_dict:
@@ -376,8 +414,8 @@ def render_agent_mind_map(status_dict: AgentStatusDict) -> None:
     # build edges svg
     svg_lines = []
     for src, dst in EDGES:
-        x1, y1 = NODE_POS[src][0] + NODE_W//2, NODE_POS[src][1] + NODE_H//2
-        x2, y2 = NODE_POS[dst][0] + NODE_W//2, NODE_POS[dst][1] + NODE_H//2
+        x1, y1 = NODE_POS[src][0] + NODE_W // 2, NODE_POS[src][1] + NODE_H // 2
+        x2, y2 = NODE_POS[dst][0] + NODE_W // 2, NODE_POS[dst][1] + NODE_H // 2
         svg_lines.append(
             f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
             f'stroke="#0078D4" stroke-width="2.4" stroke-dasharray="6,4" />'
@@ -392,22 +430,22 @@ def render_agent_mind_map(status_dict: AgentStatusDict) -> None:
         x, y = NODE_POS[ag]
         node_divs.append(
             f'<div class="node" style="left:{x}px;top:{y}px;'
-            f'background:{bg};color:{txt};border-left:6px solid {txt};'
+            f"background:{bg};color:{txt};border-left:6px solid {txt};"
             f'box-shadow:{glow};">'
-            f'{ICONS[ag]} {LABELS[ag]}</div>'
+            f"{ICONS[ag]} {LABELS[ag]}</div>"
         )
     nodes_html = "".join(node_divs)
 
     st.markdown(
-        STYLE_FLOAT +
-        f'<div class="mind-float">'
+        STYLE_FLOAT + f'<div class="mind-float">'
         f'<details open><summary style="font-size:1.1rem;font-weight:600;cursor:pointer;">🗺️ Agent Workflow Visualization</summary>'
         f'<div class="mind-title" style="margin-top:10px;">&nbsp;</div>'
         f'<div style="position:relative;width:{WIDTH}px;height:{HEIGHT}px;">'
         f'<svg width="{WIDTH}" height="{HEIGHT}" style="position:absolute;top:0;left:0;pointer-events:none">{line_svg}</svg>'
-        f'{nodes_html}</div></details></div>',
+        f"{nodes_html}</div></details></div>",
         unsafe_allow_html=True,
     )
+
 
 def main() -> None:
     """Main entry point for the Streamlit app."""
@@ -469,11 +507,9 @@ def main() -> None:
             current_query: str = ""
 
             if user_input:
-                st.session_state.chat_history.append({
-                    "role": "user",
-                    "content": user_input,
-                    "avatar": "🧑‍💻"
-                })
+                st.session_state.chat_history.append(
+                    {"role": "user", "content": user_input, "avatar": "🧑‍💻"}
+                )
                 with st.chat_message("user", avatar="🧑‍💻"):
                     st.markdown(user_input, unsafe_allow_html=True)
 
@@ -500,25 +536,33 @@ def main() -> None:
                                     st.session_state.agent_status[a] = "done"
                             render_agent_mind_map(st.session_state.agent_status)
 
-                            status, content, rewritten = evaluate_with_verifier(current_query, dicta)
+                            status, content, rewritten = evaluate_with_verifier(
+                                current_query, dicta
+                            )
                             verifier_statuses.append(status)
 
                             if status == "Approved":
-                                summarize_results(initial_message, dicta, chat_container)
+                                summarize_results(
+                                    initial_message, dicta, chat_container
+                                )
                                 break
                             elif status == "Denied" and rewritten:
                                 current_query = rewritten
-                                st.session_state.chat_history.append({
-                                    "role": "system",
-                                    "content": f"Verifier requested retry with rewritten query:\n\n{rewritten}",
-                                    "avatar": "❌",
-                                })
+                                st.session_state.chat_history.append(
+                                    {
+                                        "role": "system",
+                                        "content": f"Verifier requested retry with rewritten query:\n\n{rewritten}",
+                                        "avatar": "❌",
+                                    }
+                                )
                                 st.info(
                                     f"Verifier requested retry with rewritten query:\n\n{rewritten}",
                                     icon="ℹ️",
                                 )
                             else:
-                                st.warning("Verifier denied but no rewritten query provided. Stopping.")
+                                st.warning(
+                                    "Verifier denied but no rewritten query provided. Stopping."
+                                )
                                 break
                         except Exception as e:
                             logger.error(f"Error in agent workflow: {e}")
@@ -532,6 +576,7 @@ def main() -> None:
     finally:
         logger.info("App execution finished.")
 
+
 def run() -> None:
     """Run the Streamlit app."""
     try:
@@ -539,6 +584,7 @@ def run() -> None:
     except RuntimeError as e:
         logger.error(f"Runtime error: {e}")
         st.error(f"Runtime error: {e}")
+
 
 if __name__ == "__main__":
     run()
