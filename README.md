@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 -->
 
-## **🤖🧠 R&D AgenticRAG: Adaptive Multi‑Agent Retrieval System for R&D Workflows**
+## **🤖🧠 AgenticRAG: Adaptive Multi‑Agent Retrieval Systems**
 
 [![HLS Ignited](https://img.shields.io/badge/HLS%20Ignited-blue.svg?logo=github)](https://github.com/microsoft/aihlsIgnited) [![Azure AI Foundry Agent Service](https://img.shields.io/badge/Azure%20AI-Foundry%20Agent%20Service-4A90E2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)  [![Fabric Data Agent](https://img.shields.io/badge/Azure%20AI-Fabric%20Data%20Agent-%231072C2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/fabric?tabs=csharp&pivots=overview) [![Sharepoint Tool](https://img.shields.io/badge/Azure%20AI-SharepointTool-%231072C2.svg?logo=microsoftazure)](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/tools/sharepoint)  [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
