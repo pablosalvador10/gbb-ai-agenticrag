@@ -118,7 +118,7 @@ This closed-loop **plan → retrieve → verify → (rewrite) → synthesize** p
 
 Once the app is running, and you have set up the single agents in azure AI Foundry with connections to your knowledge sources, you can explore how Agentic RAG supports your company's most complex queries.
 
-## **🧭 What's Next: Multi-Agent Collaboration and External Integration**
+## **🧭 What's Next: Multi-Agent Collaboration**
 
 The next evolution for this project is to enable **multi-agent collaboration** (A2A, Agent-to-Agent) and seamless integration with external environments and data sources, including via the Model Context Protocol (MCP).
 
