@@ -128,7 +128,30 @@ Once the app is running, and you have set up the single agents in azure AI Found
 - **[Grounding with Bing Search](https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/bing-grounding?tabs=python&pivots=overview)** – Documentation for integrating live web search into your workflows.  
 - **[Azure AI Search tool](https://learn.microsoft.com/en-us/azure/search/semantic-vector-search-overview)** – Semantic and vector search capabilities to enrich retrieval.  
 
+
+## **🧭 What's Next: Multi-Agent Collaboration and External Integration**
+
+The next evolution for this project is to enable **multi-agent collaboration** (A2A, Agent-to-Agent) and seamless integration with external environments and data sources, including via the Model Context Protocol (MCP).
+
+### **Multi-Agent Collaboration (A2A)**
+- **Orchestrate multiple specialized agents** to solve complex, multi-step R&D workflows.
+- Implement event-driven communication and shared memory between agents for dynamic task allocation, verification, and synthesis.
+- Leverage frameworks like Semantic Kernel, AutoGen, or custom orchestrators to coordinate agent teams.
+
+### **External Integration via MCP**
+- **Model Context Protocol (MCP)** will allow agents to securely access, retrieve, and act on data from external systems, databases, and APIs.
+- This enables agents to operate across organizational boundaries, connect to third-party knowledge sources, and participate in federated R&D workflows.
+
+### **Planned Features**
+- Agent-to-agent messaging and negotiation for distributed problem solving.
+- Real-time event streaming and traceability across agent teams.
+- Secure, governed access to external data and tools via MCP.
+- Example use cases: cross-team research, federated analytics, and automated compliance checks.
+
+Stay tuned for updates as we expand AgenticRAG into a fully collaborative, enterprise-ready multi-agent platform!
+
 <br>
 
 > [!IMPORTANT]  
 > This software is provided for demonstration purposes only. It is not intended to be relied upon for any production workload. The creators of this software make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the software or related content. Any reliance placed on such information is strictly at your own risk.
+
