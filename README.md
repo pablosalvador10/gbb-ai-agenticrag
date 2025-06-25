@@ -122,16 +122,16 @@ Once the app is running, and you have set up the single agents in azure AI Found
 
 The next evolution for this project is to enable **multi-agent collaboration** (A2A, Agent-to-Agent) and seamless integration with external environments and data sources, including via the Model Context Protocol (MCP).
 
-### **Multi-Agent Collaboration (A2A)**
+**Multi-Agent Collaboration (A2A)**
 - **Orchestrate multiple specialized agents** to solve complex, multi-step R&D workflows.
 - Implement event-driven communication and shared memory between agents for dynamic task allocation, verification, and synthesis.
 - Leverage frameworks like Semantic Kernel, AutoGen, or custom orchestrators to coordinate agent teams.
 
-### **External Integration via MCP**
+**External Integration via MCP**
 - **Model Context Protocol (MCP)** will allow agents to securely access, retrieve, and act on data from external systems, databases, and APIs.
 - This enables agents to operate across organizational boundaries, connect to third-party knowledge sources, and participate in federated R&D workflows.
 
-### **Planned Features**
+**Planned Features**
 - Agent-to-agent messaging and negotiation for distributed problem solving.
 - Real-time event streaming and traceability across agent teams.
 - Secure, governed access to external data and tools via MCP.
