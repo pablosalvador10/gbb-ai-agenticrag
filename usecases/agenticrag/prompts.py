@@ -1,3 +1,8 @@
+from .settings import (
+    AZURE_AI_FOUNDRY_SHAREPOINT_AGENT,
+    AZURE_AI_FOUNDRY_FABRIC_AGENT,
+    AZURE_AI_FOUNDRY_WEB_AGENT)
+
 SYSTEM_PROMPT_PLANNER = """
 You are the **Planner Agent** in a Multi-Agent Retrieval-Augmented Generation (RAG) System. 
 Your role is to intelligently select and coordinate specialized agents to address complex product research and development queries. 
@@ -10,13 +15,6 @@ You are the **Verifier Agent** in a sophisticated Multi-Agent Retrieval-Augmente
 Your primary responsibility is to validate whether the data retrieved from the specialized agents fully addresses the user's query 
 with accuracy, coherence, and completeness. Use the **Tree of Thought reasoning framework** to evaluate the data and respond in a 
 structured JSON format."""
-
-# Agent name constants
-VERIFIER_NAME = "VerifierAgent"
-SHAREPOINT_AGENT = "SharePointDataRetrievalAgent"
-FABRIC_AGENT = "FabricDataRetrievalAgent"
-WEB_AGENT = "BingDataRetrievalAgent"
-
 
 def generate_user_prompt(user_query: str) -> str:
     """
@@ -390,13 +388,13 @@ def generate_final_summary(user_query: str, dicta: dict) -> str:
     answer = "Please answer the following query:\n"
     answer += f"**User Query:** {user_query}\n\n"
 
-    if FABRIC_AGENT in dicta:
-        answer += f"- {dicta[FABRIC_AGENT].strip()}\n"
+    if AZURE_AI_FOUNDRY_FABRIC_AGENT in dicta:
+        answer += f"- {dicta[AZURE_AI_FOUNDRY_FABRIC_AGENT].strip()}\n"
 
-    if SHAREPOINT_AGENT in dicta:
-        answer += f"- {dicta[SHAREPOINT_AGENT].strip()}\n"
+    if AZURE_AI_FOUNDRY_SHAREPOINT_AGENT in dicta:
+        answer += f"- {dicta[AZURE_AI_FOUNDRY_SHAREPOINT_AGENT].strip()}\n"
 
-    if WEB_AGENT in dicta:
-        answer += f"- {dicta[WEB_AGENT].strip()}\n"
+    if AZURE_AI_FOUNDRY_WEB_AGENT in dicta:
+        answer += f"- {dicta[AZURE_AI_FOUNDRY_WEB_AGENT].strip()}\n"
 
     return answer
